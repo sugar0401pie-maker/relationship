@@ -50,16 +50,33 @@ async function runAttempt(row: Row, attempt: number) {
   let usage: AiUsage | undefined;
   let patch: Record<string, unknown>;
   try {
+    const started = Date.now();
     const req = B().buildRequest(s);
-    const out = await generateReportText(req.system, req.user, ATTEMPT_TIMEOUT_MS);
+    const ctx = B().buildContext(s);
+    let out = await generateReportText(req.system, req.user, ATTEMPT_TIMEOUT_MS);
     usage = out.usage;
-    const v = validate(out.text, B().buildContext(s));
+    let v = validate(out.text, ctx);
+    // 검증에 걸리면 같은 시도 안에서 한 번 고쳐 쓰게 한다(owner 2026-11-25 — luna가 분량 R2·말투 R7에 자주 걸림).
+    // 처음부터 다시 쓰게 하면 같은 곳에서 또 걸리기 쉬워, 방금 쓴 글과 걸린 규칙(자동 검증의 상세)을 함께 돌려준다.
+    // 시스템 프롬프트는 그대로이고, 고친 글도 똑같이 검증한다. 남은 시간이 넉넉할 때만.
+    const left = ATTEMPT_TIMEOUT_MS - (Date.now() - started);
+    if (!v.pass && left > 90_000) {
+      const fix = await generateReportText(req.system, [
+        { role: "user", content: req.user },
+        { role: "assistant", content: out.text },
+        { role: "user", content: revisionNote(v) },
+      ], left - 5_000);
+      usage = sumUsage(usage, fix.usage);
+      const v2 = validate(fix.text, ctx);
+      out = fix;
+      v = v2;
+    }
     if (v.pass) {
       patch = { report_status: "ready", report_body: out.text, report_validation: v, report_ready_at: new Date().toISOString() };
     } else {
       // 검증 실패 글은 저장하지 않는다(어떤 규칙에서 걸렸는지만 남김 — 글 내용 없음)
       const checks = v.checks.filter((c: { pass: boolean }) => !c.pass).map((c: { id: string; detail: string }) => ({ id: c.id, detail: String(c.detail).slice(0, 200) }));
-      console.warn(`[rel-ai] 검증 실패 attempt=${attempt} rules=${checks.map((c: { id: string }) => c.id).join(",")}`);
+      console.warn(`[rel-ai] 검증 실패 attempt=${attempt} chars=${v.chars} rules=${checks.map((c: { id: string }) => c.id).join(",")}`);
       patch = { report_status: nextStatus(attempt), report_validation: { pass: false, chars: v.chars, failed: checks } };
     }
   } catch (e) {
@@ -72,3 +89,29 @@ async function runAttempt(row: Row, attempt: number) {
 
 // 짝수 번째 시도(=그 회차의 재생성)까지 실패하면 'failed', 홀수 번째면 한 번 더 할 수 있게 'none'
 const nextStatus = (attempt: number) => (attempt % 2 === 1 && attempt < MAX_REPORT_ATTEMPTS ? "none" : "failed");
+
+const sumUsage = (a: AiUsage, b: AiUsage): AiUsage => ({ model: b.model, input: a.input + b.input, output: a.output + b.output, reasoning: a.reasoning + b.reasoning, ms: a.ms + b.ms });
+
+// 고쳐 쓰기 요청: 걸린 규칙과 자동 검증이 찾은 자리(문장 끝 일부·글자 수)만 알려 준다. 규칙 원문은 시스템 프롬프트에 이미 있다.
+const RULE_HINT: Record<string, string> = {
+  R1: "### 4. ~ ### 8. 헤더 5개를 제목 그대로, 이 순서로만 씁니다(1~3번 헤더 금지).",
+  R2: "전체 분량을 공백 제외 3,000~4,500자로 맞춥니다. 모자라면 장면 문단을, 넘치면 겹치는 설명을 줄입니다.",
+  R3: "5·6·8번은 '• ' 말머리 줄이 정확히 3개, 7번은 '첫째,' '둘째,' '셋째,'로 시작하는 문단이 있어야 합니다.",
+  R4: "8번 마지막 문단은 '이 리포트와 함께 1주일간 AI 채팅 이용권이 제공됩니다'로 시작합니다.",
+  R5: "금지어(회피형·불안형·집착·이기적·최악·상극·헤어지·이별하·참아야·**)를 쓰지 않습니다.",
+  R6: "학자 이름과 영어 이론명을 쓰지 않습니다.",
+  R7: "따옴표 밖 모든 문장을 합쇼체(~습니다/~입니다, 제안은 ~해 보세요)로 끝내고, 같은 끝 표현이 한 섹션 안에서 4문장 이상 연달아 이어지지 않게 끝맺음을 바꿉니다.",
+  R8: "한 문단은 5문장 이하로 나눕니다.",
+  R9: "'N번 장면에서 '…'를 고르셨습니다' 인용을 3개 이상 넣습니다.",
+  X1: "<pair_relation> 문장을 그대로 옮기지 말고 풀어 씁니다.",
+  X2: "동물·캐릭터 비유(○○처럼)와 물·바다 은유를 실제 행동으로 바꿉니다.",
+  X3: "지난 연애·상대 가족·이혼처럼 응답에 없는 전제를 지웁니다.",
+};
+function revisionNote(v: { chars: number; checks: { id: string; name: string; pass: boolean; detail: string }[] }): string {
+  const bad = v.checks.filter((c) => !c.pass);
+  return [
+    "방금 쓴 글이 자동 검증에서 아래 항목에 걸렸습니다. 내용과 구성은 그대로 두고 걸린 부분만 고쳐서, 4번 본문~8번 전체를 같은 형식으로 다시 써 주세요. 설명이나 머리말 없이 글만 씁니다.",
+    `(지금 분량: 공백 제외 ${v.chars}자)`,
+    ...bad.map((c) => `- ${c.id}: ${RULE_HINT[c.id] ?? c.name} / 검증 결과: ${String(c.detail).slice(0, 300)}`),
+  ].join("\n");
+}

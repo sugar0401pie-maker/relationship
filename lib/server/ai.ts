@@ -14,7 +14,8 @@ export function aiConfigured(): boolean {
 export type AiUsage = { model: string; input: number; output: number; reasoning: number; ms: number };
 
 /** 시스템 프롬프트 + 사용자 블록 → 글. 잘린 응답(incomplete)·빈 응답은 예외. 응답 문장·입력은 로그에 남기지 않는다(토큰 수만). */
-export async function generateReportText(system: string, user: string, timeoutMs: number): Promise<{ text: string; usage: AiUsage }> {
+export type Turn = { role: "user" | "assistant"; content: string };
+export async function generateReportText(system: string, user: string | Turn[], timeoutMs: number): Promise<{ text: string; usage: AiUsage }> {
   const t0 = Date.now();
   const res = await new OpenAI({ timeout: timeoutMs, maxRetries: 0 }).responses.create({
     model: REPORT_MODEL,
