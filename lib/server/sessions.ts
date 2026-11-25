@@ -99,7 +99,9 @@ export type ResultPayload = {
   report: { status: Row["report_status"]; sections: Record<number, Block[]> | null; canRetry: boolean; aiOff: boolean; attempts: number; why: string | null };
 };
 
-export const MAX_REPORT_ATTEMPTS = 4; // 한 번 만들 때 최대 2회(검증 실패 시 1회 재생성) × '다시 만들기' 1번
+// 한 결과당 AI 시도 상한. 시도 한 번 = 쓰기 + (검증에 걸리면) 고쳐 쓰기. 자동으로 2번, 그 뒤엔 사용자가 [다시 만들기]로.
+// 클로즈드 세션·luna 모델이라 넉넉히 10(owner 2026-11-25 — 4번을 다 써서 버튼이 사라졌음). 공개 전에 비용을 보고 줄인다.
+export const MAX_REPORT_ATTEMPTS = 10;
 
 export function resultPayload(row: Row): ResultPayload {
   if (row.status !== "completed" || !row.result) throw new RelError("아직 끝나지 않은 테스트입니다.", 409);
