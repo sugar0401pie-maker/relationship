@@ -213,9 +213,14 @@ function couplePlan(D: Dict, r: RelResult, v: Vars, mine: PracticeCardView[]): {
 // ---------- AI 리포트 본문(### 4. ~ ### 8.) → 화면 조각 ----------
 const CLOSING = "이 리포트와 함께 1주일간 AI 채팅 이용권이 제공됩니다";
 
+/** 리포트 글 속 점수 표기에서 끝의 0을 뺀다(4.00점 → 4점, 3.50점 → 3.5점 — owner 2026-11-25). 이미 만든 리포트·예시 문체를 따라 쓴 경우까지 화면에서 맞춘다. */
+export function trimScores(text: string): string {
+  return text.replace(/(\d+)\.(\d)(\d)(?=\s*점)/g, (_, a, b, c) => (c !== "0" ? `${a}.${b}${c}` : b !== "0" ? `${a}.${b}` : a));
+}
+
 export function parseReport(md: string): Record<number, Block[]> {
   const out: Record<number, Block[]> = {};
-  const parts = md.split(/^###\s+/m).slice(1);
+  const parts = trimScores(md).split(/^###\s+/m).slice(1);
   for (const part of parts) {
     const m = part.match(/^(\d)\./);
     if (!m) continue;

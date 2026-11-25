@@ -254,3 +254,8 @@ p { margin: 0; }
 .radar h2 { font-size: 14px; text-align: center; }
 .account { margin: 0; padding: 14px 18px 4px; text-align: center; font-size: 12.5px; line-height: 1.7; }
 .account a, .account button { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+/* 굵게(owner 2026-11-25): 제목·말머리 뒤 글·문단 첫 문장. Tailwind 기본값이 제목 굵기를 지우므로 다시 정한다. */
+h1, h2, h3, h4 { font-weight: 700; }
+.moment h3, .prose > h3, .step h3 { font-weight: 700; }
+b.first { font-weight: 700; color: var(--ink); }
+.scene .cap h2 { font-weight: 700; }

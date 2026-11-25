@@ -4,7 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import * as S from "./scoring.js";
-import { buildResultView, parseReport } from "./pages.ts";
+import { buildResultView, parseReport, trimScores } from "./pages.ts";
 import type { RelResult } from "./result.ts";
 import type { Manifest } from "./images.ts";
 
@@ -58,4 +58,9 @@ test("AI 본문 나누기: 말머리·첫째/둘째/셋째·채팅권 문단 처
   assert.deepEqual(r[7].filter((b) => b.t === "step").map((b) => (b as { n: number }).n), [1, 2, 3]);
   assert.equal(r[8].some((b) => b.t === "item"), true);
   assert.equal(JSON.stringify(r[8]).includes("채팅 이용권"), false);
+});
+
+test("점수 표기: 끝의 0을 뺀다", () => {
+  assert.equal(trimScores("겉이 4.00점, 속이 3.50점, 합계 2.25점, 1.00 점"), "겉이 4점, 속이 3.5점, 합계 2.25점, 1 점");
+  assert.equal(trimScores("2026.11.25 10.50점"), "2026.11.25 10.5점");
 });

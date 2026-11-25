@@ -20,6 +20,14 @@ function withPicks(t: string): React.ReactNode {
   return parts.length === 1 ? t : parts.map((x, j) => (j % 2 ? <span key={j} className="pick">{x}</span> : x));
 }
 
+// 문단의 첫 문장을 굵게(owner 2026-11-25). 첫 문장 = 따옴표 밖에서 '다·요·까' + 마침표·물음표로 처음 끝나는 곳까지.
+function firstBold(t: string): React.ReactNode {
+  const m = t.match(/^(?:[^"“‘']|"[^"]*"|“[^”]*”|‘[^’]*’|'[^']*')*?(?:다|요|까)[.?!]['"’”]?(?=\s|$)/);
+  if (!m) return withPicks(t);
+  const head = m[0], rest = t.slice(head.length);
+  return <><b className="first">{head}</b>{withPicks(rest)}</>;
+}
+
 const Bold = ({ parts }: { parts: { b: boolean; t: string }[] }) => <>{parts.map((p, i) => (p.b ? <b key={i}>{p.t}</b> : <span key={i}>{p.t}</span>))}</>;
 
 function TypeCard({ c, tag }: { c: TC; tag: string }) {
@@ -59,13 +67,13 @@ function Blocks({ blocks, moments, nickname = "", leadFirst }: { blocks: Block[]
       out.push(
         <div className="step" key={i}><span className="n">{b.n}</span><div>
           <h3>{stepTitle[b.n - 1]}</h3>
-          <p>{k > 0 ? body.slice(0, k).trim() : body}</p>
+          <p>{firstBold(k > 0 ? body.slice(0, k).trim() : body)}</p>
           {k > 0 && <p className="why">{body.slice(k).replace(/^이렇게 제안하는 이유는\s*/, "")}</p>}
         </div></div>,
       );
     } else {
       const text = b.parts.map((x) => x.t).join("");
-      const p = leadFirst && i === 0 ? <p key={i} className="lead">{text}</p> : <p key={i}>{withPicks(text)}</p>;
+      const p = leadFirst && i === 0 ? <p key={i} className="lead"><b>{text}</b></p> : <p key={i}>{firstBold(text)}</p>;
       if (box) box.push(p); else out.push(p);
     }
   });
@@ -185,7 +193,7 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
       <p className="lead"><Bold parts={P.p1.intro} /></p>
       <h1>{P.p1.title}</h1>
       <TypeCard c={P.p1.card} tag="첫 번째 장 · 나" />
-      <div className="prose">{P.p1.free.split(/(?<=다\.)\s+(?=다만)/).map((t) => <p key={t}>{t}</p>)}</div>
+      <div className="prose">{P.p1.free.split(/(?<=다\.)\s+(?=다만)/).map((t) => <p key={t}>{firstBold(t)}</p>)}</div>
       <div className="sw">
         <div><h4>잘하는 것</h4><ul>{P.p1.strengths.map((s) => <li key={s}>{s}</li>)}</ul></div>
         <div><h4>자주 걸리는 것</h4><ul>{P.p1.weaknesses.map((s) => <li key={s}>{s}</li>)}</ul></div>
@@ -199,7 +207,7 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
       <h1>{P.p2.title}</h1>
       {P.p2.insufficient && <p className="quote">{P.p2.insufficient}</p>}
       <TypeCard c={P.p2.card} tag={`두 번째 장 · ${P.p2.card.who}`} />
-      <div className="prose">{P.p2.free.split(/(?<=다\.)\s+(?=다만|어디까지나)/).map((t) => <p key={t} className={t.startsWith("어디까지나") ? "small" : undefined}>{t}</p>)}</div>
+      <div className="prose">{P.p2.free.split(/(?<=다\.)\s+(?=다만|어디까지나)/).map((t) => <p key={t} className={t.startsWith("어디까지나") ? "small" : undefined}>{t.startsWith("어디까지나") ? t : firstBold(t)}</p>)}</div>
       <Radar comps={P.p2.radar.comps} me={P.p2.radar.me} partner={P.p2.radar.partner} nickname={v.nickname} />
       {P.p2.unseen.map((u) => <p key={u} className="small">{u}</p>)}
     </>
