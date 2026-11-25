@@ -252,3 +252,5 @@ p { margin: 0; }
 .dark .foot a { color: var(--cream); }
 .navyb b { color: var(--navy); }
 .radar h2 { font-size: 14px; text-align: center; }
+.account { margin: 0; padding: 14px 18px 4px; text-align: center; font-size: 12.5px; line-height: 1.7; }
+.account a, .account button { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }

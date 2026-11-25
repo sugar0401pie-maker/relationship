@@ -1,5 +1,6 @@
 // 휴대폰 너비 한 줄 틀(시안 .app) + 위 띠(테스트 이름).
 import Link from "next/link";
+import AccountLink from "./AccountLink";
 
 export default function Shell({ children, top, bottom }: { children: React.ReactNode; top?: React.ReactNode; bottom?: React.ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export default function Shell({ children, top, bottom }: { children: React.React
         {top}
       </header>
       <main>{children}</main>
+      <AccountLink />
       {bottom}
     </div>
   );

@@ -3,7 +3,7 @@ import { createAdminClient } from "./supabaseAdmin";
 import { relData, imageManifest } from "./data";
 import { RelError } from "./http";
 import { STEP_RE, canOpen, nextStep, prune, type Answers } from "@/lib/rel/flow";
-import { buildStep, answerFromInput, safetyCopy, type Relationship, type StepScreen } from "@/lib/rel/steps";
+import { buildStep, answerFromInput, type Relationship, type StepScreen } from "@/lib/rel/steps";
 import { computeResult, type RelResult } from "@/lib/rel/result";
 import { buildResultView, parseReport, type ResultView, type Block } from "@/lib/rel/pages";
 
@@ -64,9 +64,8 @@ export function stepScreen(row: Row, step: string): { screen?: StepScreen; redir
   const D = relData();
   if (row.status === "completed") return { redirect: "done" };
   if (!STEP_RE.test(step) || !canOpen(step, row.answers, D)) return { redirect: nextStep(row.answers, D) ?? "done" };
-  const screen = buildStep(step, row.answers, D, who(row));
-  if (step === "intro1") screen.safety = safetyCopy(D);
-  return { screen };
+  // 안전 안내는 첫 화면(/)에만 고정 표시하고 1부 안내 화면에서는 반복하지 않는다(owner 2026-11-25). 결과 10쪽 고지문에는 스펙대로 들어 있다.
+  return { screen: buildStep(step, row.answers, D, who(row)) };
 }
 
 export async function saveAnswer(row: Row, step: string, value: unknown): Promise<string> {

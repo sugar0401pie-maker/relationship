@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AuthGate from "@/components/AuthGate";
 import SiteFooter from "@/components/SiteFooter";
+import AccountLink from "@/components/AccountLink";
 import { relData } from "@/lib/server/data";
 import { R, cleanContacts } from "@/lib/rel/text";
 
@@ -39,7 +40,7 @@ export default function Home() {
           <Link href="/start" className="btn-cream" style={{ textDecoration: "none" }}>우리가 만나는 곳 찾기</Link>
           <Link href="/results" style={{ color: "var(--sky)", textAlign: "center", fontSize: 14 }}>내 결과 다시 보기</Link>
         </div>
-        <div className="dark" style={{ maxWidth: 460, margin: "0 auto" }}><SiteFooter /></div>
+        <div className="dark" style={{ maxWidth: 460, margin: "0 auto" }}><AccountLink tone="dark" /><SiteFooter /></div>
       </div>
     </AuthGate>
   );
