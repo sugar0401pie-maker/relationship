@@ -105,7 +105,7 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
     if (initial || !status || status === "ready" || status === "failed") return;
     const t = setInterval(async () => {
       const r = await load();
-      if (r?.report.status === "none" && kicked.current < 3) {
+      if ((r?.report.status === "none" || r?.report.status === "generating") && kicked.current < 40) {
         kicked.current++;
         void api(`/api/rel/result/${id}/report`, { method: "POST", body: {} }).catch(() => {});
       }
@@ -174,7 +174,7 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
       <h1>{P.ai[no].title}</h1>
       {img(no + 1) && <figure className="illus"><img src={img(no + 1)!.src} alt={img(no + 1)!.alt} /></figure>}
       {no === 4 && <p><b style={{ color: "var(--navy)" }}>{P.leadLines.split(/(?<=다\.)\s/)[0]}</b> {P.leadLines.split(/(?<=다\.)\s/).slice(1).join(" ")}</p>}
-      {ai?.[no] ? <Blocks blocks={ai[no]} moments={moments} nickname={v.nickname} leadFirst={no === 7} /> : <ReportWait status={data.report.status} canRetry={data.report.canRetry} teaser={P.ai[no].teaser} onRetry={retry} />}
+      {ai?.[no] ? <Blocks blocks={ai[no]} moments={moments} nickname={v.nickname} leadFirst={no === 7} /> : <ReportWait r={data.report} teaser={P.ai[no].teaser} onRetry={retry} />}
       {no === 6 && ai?.[no] && <p className="small">어디까지나 내 시선으로 본 모습입니다.</p>}
     </>
   );
@@ -270,7 +270,7 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
     <>
       <h1>이번 주 실천 카드</h1>
       {img(9) && <figure className="illus"><img src={img(9)!.src} alt={img(9)!.alt} /></figure>}
-      {ai?.[8] ? <Blocks blocks={ai[8]} /> : <ReportWait status={data.report.status} canRetry={data.report.canRetry} teaser={P.ai[8].teaser} onRetry={retry} />}
+      {ai?.[8] ? <Blocks blocks={ai[8]} /> : <ReportWait r={data.report} teaser={P.ai[8].teaser} onRetry={retry} />}
       {P.p9.cards.filter((c) => !c.together).map((c) => card(c))}
       <h2 style={{ marginTop: 6 }}>{v.nickname}과 함께</h2>
       {P.p9.cards.filter((c) => c.together).map((c, i) => card(c, i + 1))}
@@ -341,12 +341,14 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
   );
 }
 
-function ReportWait({ status, canRetry, teaser, onRetry }: { status: string; canRetry: boolean; teaser: string; onRetry: () => void }) {
-  if (status === "failed") {
+function ReportWait({ r, teaser, onRetry }: { r: ResultPayload["report"]; teaser: string; onRetry: () => void }) {
+  if (r.aiOff) return <div className="box"><p>AI 리포트 설정(OPENAI_API_KEY)이 비어 있어 리포트를 만들 수 없습니다.</p></div>;
+  if (r.status === "failed") {
     return (
       <div className="box">
         <p>리포트를 만들지 못했습니다. 잠시 뒤 다시 만들어 볼 수 있습니다.</p>
-        {canRetry && <button className="btn-navy" onClick={onRetry}>다시 만들기</button>}
+        {r.why && <p className="small">{r.why} (시도 {r.attempts}회)</p>}
+        {r.canRetry && <button className="btn-navy" onClick={onRetry}>다시 만들기</button>}
       </div>
     );
   }
@@ -354,6 +356,7 @@ function ReportWait({ status, canRetry, teaser, onRetry }: { status: string; can
     <div className="box" aria-live="polite">
       <p className="small">{teaser.replace(/\*\*/g, "")}</p>
       <div style={{ display: "flex", gap: 10, alignItems: "center" }}><div className="wave-dot" style={{ width: 24, height: 24, borderWidth: 3 }} aria-hidden /><p>바다 친구들이 리포트를 쓰고 있습니다… 1~3분쯤 걸립니다.</p></div>
+      {r.why && <p className="small">앞선 시도: {r.why} — 다시 쓰는 중입니다.</p>}
     </div>
   );
 }

@@ -20,6 +20,7 @@ export type Row = {
   report_status: "none" | "generating" | "ready" | "failed";
   report_body: string | null;
   report_attempts: number;
+  report_validation: { pass?: boolean; error?: string; failed?: { id: string }[] } | null;
   report_started_at: string | null;
   created_at: string;
   completed_at: string | null;
@@ -95,7 +96,7 @@ export async function finish(row: Row): Promise<Row> {
 
 export type ResultPayload = {
   view: ResultView;
-  report: { status: Row["report_status"]; sections: Record<number, Block[]> | null; canRetry: boolean };
+  report: { status: Row["report_status"]; sections: Record<number, Block[]> | null; canRetry: boolean; aiOff: boolean; attempts: number; why: string | null };
 };
 
 export const MAX_REPORT_ATTEMPTS = 4; // 한 번 만들 때 최대 2회(검증 실패 시 1회 재생성) × '다시 만들기' 1번
@@ -111,8 +112,19 @@ export function resultPayload(row: Row): ResultPayload {
       status: row.report_status,
       sections: row.report_status === "ready" && row.report_body ? parseReport(row.report_body) : null,
       canRetry: row.report_status === "failed" && row.report_attempts < MAX_REPORT_ATTEMPTS,
+      // 클로즈드 세션 점검용: 리포트가 안 나올 때 이유를 화면에 짧게 보인다(글 내용은 없음 — 오류 종류·걸린 검증 규칙 번호만)
+      aiOff: !process.env.OPENAI_API_KEY,
+      attempts: row.report_attempts,
+      why: reportWhy(row.report_validation),
     },
   };
+}
+
+function reportWhy(v: Row["report_validation"]): string | null {
+  if (!v || v.pass) return null;
+  if (v.error) return `AI 호출 오류: ${v.error.slice(0, 120)}`;
+  if (v.failed?.length) return `자동 검증에서 걸린 규칙: ${v.failed.map((f) => f.id).join(", ")}`;
+  return null;
 }
 
 export async function listMine(userId: string) {
