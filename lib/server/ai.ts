@@ -2,8 +2,8 @@ import "server-only";
 import OpenAI from "openai";
 
 // 이 앱에서 AI를 부르는 유일한 곳. 모델·회사를 바꿀 때 여기만 고친다.
-// 모델: 패키지 스펙(마스터 스펙 10장 7번·report_pretest 기본값)대로 gpt-6-sol. env REL_AI_MODEL로 바꿀 수 있다.
-export const REPORT_MODEL = process.env.REL_AI_MODEL || "gpt-6-sol";
+// 모델: owner 결정(2026-11-25)으로 쏘웰라·타로와 같은 gpt-5.6-luna(패키지 스펙 기본은 gpt-6-sol). env REL_AI_MODEL로 바꿀 수 있다.
+export const REPORT_MODEL = process.env.REL_AI_MODEL || "gpt-5.6-luna";
 // 디저트 테스트 마스터 스펙 8.5 운영 설정(25,000 토큰)을 따른다(관계 테스트 마스터 스펙 7장).
 const MAX_OUTPUT_TOKENS = 25000;
 

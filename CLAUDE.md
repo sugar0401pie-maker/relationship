@@ -29,7 +29,7 @@ owner는 개발자가 아니다. 큰 변경마다 (1) 무엇을·왜 바꾸는�
 - 순수 로직(서버·테스트 공용): `lib/rel/flow.ts`(장면 순서·확인 화면), `steps.ts`(장면 문구 렌더 — 점수는 브라우저로 보내지 않고 보기 위치로만), `result.ts`(채점 = 패키지 `scoring.js` 호출만), `pages.ts`(결과 10쪽 조립), `images.ts`(그림 규칙), `reportInput.js`(AI 입력 = 패키지 `report_pretest/build_input.mjs`와 같은 규칙), `reportValidate.js`(자동 검증 = 패키지 `validate.mjs`, 유형 이름만 ctx로).
 - `lib/rel/scoring.js`·`josa.js`·`test_scoring.mjs`·`report_pretest/`는 owner 패키지 원본 — **로직을 고치지 않는다**(경로만 이 저장소에 맞춤). 패키지 새 버전이 오면 `data/`·`docs/`·`db/`·이 파일들을 통째로 바꾸고 `npm test`.
 - 서버는 `lib/server/*`(`server-only`). 데이터·문서는 실행 중에 파일로 읽는다(`lib/server/data.ts`, 배포본 포함은 `next.config.ts` outputFileTracingIncludes).
-- AI는 `lib/server/ai.ts` 한 곳(Responses API, 모델 env `REL_AI_MODEL`, 기본 `gpt-6-sol`, 25,000 토큰, `store:false`). 한 번 호출 = 한 번 시도, 검증 실패 시 'none'으로 돌려 결과 화면이 다시 요청 → 2회차도 실패면 'failed'(글은 저장 안 함). 사용자가 [다시 만들기]로 한 회차 더(최대 4회 시도).
+- AI는 `lib/server/ai.ts` 한 곳(Responses API, 모델 env `REL_AI_MODEL`, 기본 `gpt-5.6-luna`(owner 2026-11-25, 패키지 스펙 기본은 gpt-6-sol), 25,000 토큰, `store:false`). 한 번 호출 = 한 번 시도, 검증 실패 시 'none'으로 돌려 결과 화면이 다시 요청 → 2회차도 실패면 'failed'(글은 저장 안 함). 사용자가 [다시 만들기]로 한 회차 더(최대 4회 시도).
 - AI 리포트의 '강하게 답한 장면'(notable_answers)은 패키지에 규칙이 없어 고정 규칙으로 고른다(`reportInput.js` pickNotable 주석).
 
 ## 4. Supabase 공유 규칙
