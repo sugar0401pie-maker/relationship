@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import Shell from "./Shell";
 import Radar from "./Radar";
 import { api } from "@/lib/client/api";
+import { preloadKakao, shareKakaoCard } from "@/lib/client/kakaoShare";
+import KakaoTalkLogo from "./share/KakaoTalkLogo";
 import type { ResultPayload } from "@/lib/server/sessions";
 import type { Block, TypeCard as TC } from "@/lib/rel/pages";
 
@@ -128,6 +130,7 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
     return () => window.removeEventListener("keydown", onKey);
   });
   const touch = useRef<number | null>(null);
+  useEffect(() => { if (page === 4 || page === 10) preloadKakao(); }, [page]);
 
   async function retry() {
     await api(`/api/rel/result/${id}/report`, { method: "POST", body: { retry: true } }).catch(() => {});
@@ -136,9 +139,23 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
     setData((d) => (d ? { ...d, report: { ...d.report, status: "generating", canRetry: false } } : d));
   }
 
-  async function share(text: string) {
-    const url = window.location.origin;
-    const full = `${text}\n강에 사는 나, 바다에 사는 너 — 우리는 어떤 바다 친구일까?\n${url}`;
+  // [카카오톡으로 공유]: 카카오톡 카드(그림 + 이야기 한 줄 + [당신이 보는 우리는?] → 테스트 첫 화면)를 보낸다.
+  // 카카오 키가 없거나 도메인이 등록되지 않아 실패하면 휴대폰 공유창 → 링크 복사 순으로 넘어간다.
+  async function share() {
+    if (!data) return;
+    const p4 = data.view.pages.p4;
+    const url = window.location.origin + "/";
+    const sent = await shareKakaoCard({
+      title: p4.shareText,
+      description: "강에 사는 나, 바다에 사는 너 — 우리는 어떤 바다 친구일까?",
+      imageUrl: window.location.origin + p4.shareImage,
+      imageWidth: 800,
+      imageHeight: p4.shareImage.includes("/pairs/") ? 1000 : 800,
+      url,
+      button: p4.shareButton,
+    });
+    if (sent) return;
+    const full = `${p4.shareText}\n강에 사는 나, 바다에 사는 너 — 우리는 어떤 바다 친구일까?\n${url}`;
     try {
       if (navigator.share) await navigator.share({ title: "강에 사는 나, 바다에 사는 너", text: full });
       else { await navigator.clipboard.writeText(full); setToast("링크를 복사했습니다"); setTimeout(() => setToast(null), 1800); }
@@ -263,7 +280,7 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
             <div><h3>{v.nickname}에게 부탁해 볼 말</h3><p className="quote">{P.p4.ask}</p></div>
           </div>
           <div>
-            <ShareRow onShare={() => share(P.p4.shareText)} onSave={() => P.p4.pic && saveImage(P.p4.pic.src)} onCopy={copyLink} saveLabel="그림 저장" />
+            <ShareRow onShare={share} onSave={() => P.p4.pic && saveImage(P.p4.pic.src)} onCopy={copyLink} saveLabel="그림 저장" />
             <p className="small" style={{ marginTop: 6 }}>{P.p4.shareNote}</p>
           </div>
         </>
@@ -310,7 +327,7 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
         <div className="starters">{P.p10.starters.map((q) => <button key={q} onClick={() => window.open(SOWELLA_URL, "_blank", "noopener")}>{q}</button>)}</div>
       </div>
       <button className="cta" onClick={() => window.open(SOWELLA_URL, "_blank", "noopener")}>쏘웰라와 이야기 시작하기</button>
-      <ShareRow onShare={() => share(P.p4.shareText)} onSave={() => window.print()} onCopy={copyLink} saveLabel="리포트 저장" />
+      <ShareRow onShare={share} onSave={() => window.print()} onCopy={copyLink} saveLabel="리포트 저장" />
       <p className="disclaimer">{P.p10.disclaimer}</p>
     </>
   );
@@ -372,7 +389,7 @@ function ReportWait({ r, teaser, onRetry }: { r: ResultPayload["report"]; teaser
 function ShareRow({ onShare, onSave, onCopy, saveLabel }: { onShare: () => void; onSave: () => void; onCopy: () => void; saveLabel: string }) {
   return (
     <div className="share">
-      <button className="kakao" onClick={onShare}>공유하기</button>
+      <button className="kakao" onClick={onShare} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}><KakaoTalkLogo size={20} />카카오톡으로 공유</button>
       <button onClick={onSave}>{saveLabel}</button>
       <button onClick={onCopy}>링크 복사</button>
     </div>

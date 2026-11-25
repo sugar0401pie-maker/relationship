@@ -33,7 +33,7 @@ export type ResultView = {
     p1: { title: string; intro: { b: boolean; t: string }[]; card: TypeCard; free: string; strengths: string[]; weaknesses: string[]; theory: string; consistency: string[] };
     p2: { title: string; card: TypeCard; free: string; unseen: string[]; radar: { comps: string[]; me: number[]; partner: (number | null)[] }; insufficient?: string };
     p3: { title: string; cards: [TypeCard, TypeCard]; common: string; diff: string; free: string; twoTitle: string; loopName: string; trigger: string; myMove: string; theirMove: string; loopNote?: string; lead: { b: boolean; t: string }[]; mesh: string; stop: { b: boolean; t: string }[]; next: string };
-    p4: { title: string; teaser: string; cta: string; pic: Pic | null; side: [string, string] | null; line: string; story: string; bridge: string; myStep: string; ask: string; shareNote: string; shareText: string };
+    p4: { title: string; teaser: string; cta: string; pic: Pic | null; side: [string, string] | null; line: string; story: string; bridge: string; myStep: string; ask: string; shareNote: string; shareText: string; shareButton: string; shareImage: string };
     ai: Record<4 | 5 | 6 | 7 | 8, { title: string; teaser: string }>;
     leadLines: string;
     images: Pic[];
@@ -162,6 +162,8 @@ export function buildResultView(D: Dict, M: Manifest, inp: BuildInput): ResultVi
         line: R(prel.이야기_한줄, vars), story: R(prel.쏠_마을_이야기, vars), bridge: R(flow.다리, fv),
         myStep: R(prel.내가_해볼_한_걸음, vars), ask: R(prel.부탁해_볼_말, vars),
         shareNote: str(share.sheet_note), shareText: R(prel.이야기_한줄, vars),
+        // 공유 카드: 4쪽 두 캐릭터 그림(없으면 내 유형 그림) + 이야기 한 줄 + [당신이 보는 우리는?]. 이름·애칭·점수는 넣지 않는다(result_flow.share 규칙)
+        shareButton: str(ui.share_button), shareImage: meet.pair?.src ?? myCard.img ?? "/images/intro.jpg",
       },
       ai: {
         4: { title: aiTitle(4), teaser: R(str(teasers["5"]), vars) },
