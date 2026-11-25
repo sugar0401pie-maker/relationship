@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>관계 테스트 결과 화면 시안</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* 배치: 하늘색 바탕 위에 [시연 버튼 · 휴대폰 틀(옆으로 넘기는 10쪽) · 설명] — 넓은 화면은 휴대폰 왼쪽 + 설명 오른쪽, 좁은 화면은 위에서 아래로 */
+:root {
+  color-scheme: light;
+  --navy: #013566;
+  --navy-deep: #01365C;
+  --cream: #FDF6E9;
+  --white: #FFFFFF;
+  --sky: #C9D9E8;
+  --sky-soft: #EEF3F8;
+  --ink: #1C2B3A;
+  --line: #D8E1EA;
+  --muted: #5A6878;
+  --sky-strong: #7FA3C4; /* 하늘색 선(레이더의 {애칭} 테두리)용 파생 */
+  --kakao: #FEE500;
+  --body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --cute: "Gaegu", "Noto Sans KR", sans-serif; /* 유형 이름에만 */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--sky-soft); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.6; overflow-x: hidden; -webkit-text-size-adjust: 100%; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; }
+:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; border-radius: 6px; }
+.pay :focus-visible, .loading :focus-visible { outline-color: var(--cream); }
+[hidden] { display: none !important; }
+
+.stage { max-width: 880px; margin: 0 auto; padding: 16px; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "ctl" "phone" "cap" "list"; justify-items: center; }
+.ctl { grid-area: ctl; } .phone { grid-area: phone; } .cap { grid-area: cap; } .list { grid-area: list; }
+.panel { width: 100%; max-width: 400px; background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.panel h2 { font-size: 13px; margin: 0 0 8px; color: var(--navy); font-weight: 700; }
+@media (max-width: 859px) { .ctl { padding: 8px 10px; } .ctl h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); } .ctl .seg button { padding: 7px 11px; font-size: 12.5px; } .ctl .chipbtn { padding: 7px 9px; font-size: 12.5px; } .ctl-row { gap: 6px; } }
+.ctl-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.seg { display: inline-flex; border: 1.5px solid var(--navy); border-radius: 999px; overflow: hidden; background: var(--white); }
+.seg button { border: 0; background: transparent; color: var(--navy); padding: 7px 14px; font-size: 13px; font-weight: 500; min-height: 36px; }
+.seg button[aria-pressed="true"] { background: var(--navy); color: var(--cream); font-weight: 700; }
+.seg button:focus-visible { outline-offset: -4px; outline-color: var(--sky-strong); }
+.chipbtn { border: 1.5px solid var(--line); background: var(--white); color: var(--navy); border-radius: 999px; padding: 7px 12px; font-size: 13px; min-height: 36px; }
+.chipbtn:hover { border-color: var(--navy); }
+.cap { font-size: 12px; color: var(--muted); }
+.cap p { margin: 0 0 6px; word-break: keep-all; }
+.cap p:last-child { margin: 0; }
+.list ol { margin: 0; padding-left: 20px; font-size: 13px; }
+.list li { margin-bottom: 5px; word-break: keep-all; }
+.list li b { color: var(--navy); }
+
+@media (min-width: 860px) {
+  .stage { grid-template-columns: 400px minmax(0, 1fr); grid-template-areas: "phone ctl" "phone cap" "phone list"; grid-template-rows: auto auto 1fr; column-gap: 28px; justify-items: stretch; align-items: start; padding: 24px 16px; }
+  .panel { max-width: none; }
+}
+
+/* ── 휴대폰 틀 ── */
+.phone { width: 100%; max-width: 400px; height: min(820px, calc(100dvh - 100px)); min-height: 540px; background: var(--cream); border-radius: 22px; overflow: hidden; position: relative; display: flex; flex-direction: column; box-shadow: 0 14px 40px #01356626, 0 0 0 1px var(--line); }
+@media (min-width: 860px) { .phone { height: min(820px, calc(100dvh - 48px)); position: sticky; top: 24px; } }
+.dots { display: flex; gap: 6px; justify-content: center; padding: 12px 0 8px; background: var(--cream); border-bottom: 1px solid #01356614; }
+.dots i { width: 7px; height: 7px; border-radius: 50%; background: #01356655; transition: all .25s; }
+.dots i.on { width: 20px; border-radius: 4px; background: var(--navy); }
+.dots i.lock { background: #0135662b; }
+.dots i.lock.on { background: #01356680; }
+.rail { flex: 1; min-height: 0; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.rail::-webkit-scrollbar { display: none; }
+.page { flex: 0 0 100%; scroll-snap-align: start; overflow-y: auto; padding-bottom: 20px; }
+.ph { position: sticky; top: 0; z-index: 2; background: linear-gradient(var(--cream) 80%, #FDF6E900); padding: 14px 18px 10px; display: flex; align-items: flex-start; gap: 8px; }
+.ph h1 { font-size: 16.5px; font-weight: 700; color: var(--navy); flex: 1; line-height: 1.35; margin: 0; word-break: keep-all; letter-spacing: -.01em; }
+.ph .no { font-size: 11px; color: var(--muted); min-width: 34px; text-align: right; padding-top: 3px; }
+.pbody { padding: 2px 18px 10px; font-size: 14px; line-height: 1.75; }
+.pbody p { margin: 0 0 10px; word-break: keep-all; }
+.pbody p b { color: var(--navy); }
+.small { font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+.theory { margin-top: 14px !important; padding-top: 10px; border-top: 1px dashed #01356633; }
+.demo-tag { display: inline-block; font-size: 10.5px; background: var(--sky-soft); color: var(--navy); border: 1px solid var(--line); border-radius: 8px; padding: 0 7px; margin-right: 6px; vertical-align: 1px; }
+
+.typecard { background: var(--white); border: 1px solid var(--line); border-radius: 18px; padding: 16px 14px 14px; text-align: center; margin: 4px 0 14px; box-shadow: 0 4px 14px #0135660f; }
+.typecard .blob { width: 128px; height: 128px; margin: 0 auto 6px; display: block; }
+.typecard .who { font-size: 12.5px; color: var(--muted); margin: 0 !important; }
+.typecard .tname { font-family: var(--cute); font-size: 34px; line-height: 1.1; color: var(--navy); margin: 0 0 6px !important; }
+.chips { display: flex; gap: 6px; justify-content: center; margin: 0 0 8px; flex-wrap: wrap; }
+.chips span { font-size: 11.5px; background: var(--sky-soft); color: var(--navy); border-radius: 12px; padding: 1px 10px; }
+.typecard .desc { font-size: 13.5px; font-weight: 500; margin: 0 !important; line-height: 1.6; }
+
+.radar { background: var(--white); border: 1px solid var(--line); border-radius: 18px; padding: 12px 8px 10px; margin: 14px 0 4px; }
+.radar h3 { font-size: 13.5px; color: var(--navy); margin: 0 6px 2px; }
+.radar svg { display: block; width: 100%; height: auto; max-width: 320px; margin: 0 auto; }
+.legend { display: flex; gap: 14px; justify-content: center; font-size: 12px; margin-top: 2px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+
+.strip { display: flex; gap: 8px; margin: 4px 0 6px; }
+.scard { flex: 1; aspect-ratio: 2/3; border-radius: 10px; overflow: hidden; background: var(--white); border: 1px solid var(--line); box-shadow: 0 6px 16px #01356626; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px 4px; text-align: center; }
+.scard svg { width: 78%; height: auto; display: block; }
+.scard .cap1 { font-size: 10.5px; color: var(--muted); line-height: 1.3; margin-top: 4px; }
+.scard .cap2 { font-family: var(--cute); font-size: 19px; color: var(--navy); line-height: 1.1; }
+.scard.back { padding: 0; border: 0; background: var(--navy-deep); }
+.scard.back svg { width: 100%; height: 100%; }
+.hint { text-align: center; font-size: 11px; color: var(--muted); margin: 0 0 12px !important; }
+.twolines { border-left: 3px solid var(--navy); padding: 2px 0 2px 12px; margin: 0 0 12px; }
+.twolines p { margin: 0 0 6px; }
+.twolines p:last-child { margin: 0; }
+.twolines .common { font-weight: 700; color: var(--navy); }
+.softbox { background: var(--sky-soft); border-radius: 14px; padding: 14px 14px 10px; margin: 16px 0 14px; }
+.softbox h3 { font-size: 14.5px; color: var(--navy); margin: 0 0 8px; }
+.softbox .loopname { display: inline-block; background: var(--navy); color: var(--cream); font-weight: 700; font-size: 13px; border-radius: 12px; padding: 2px 12px; margin-bottom: 10px; }
+.softbox ol { list-style: none; margin: 0; padding: 0; }
+.softbox li { display: flex; gap: 8px; margin-bottom: 6px; font-size: 13.5px; line-height: 1.6; word-break: keep-all; }
+.softbox li span { flex: 0 0 auto; font-size: 10.5px; font-weight: 700; color: var(--navy); background: var(--white); border-radius: 8px; padding: 0 7px; height: 20px; line-height: 20px; margin-top: 2px; }
+.stop { margin-top: 16px !important; padding-top: 14px; border-top: 1px dashed #01356640; }
+
+.bigcard { width: 66%; max-width: 250px; margin: 6px auto 14px; perspective: 900px; }
+.flip-card { position: relative; aspect-ratio: 2/3; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.22,.8,.24,1); }
+.flip-card.is-flipped { transform: rotateY(180deg); }
+.flip-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 26px #01356640; }
+.flip-face svg { display: block; width: 100%; height: 100%; }
+.flip-front { transform: rotateY(180deg); background: var(--cream); border: 1px solid var(--line); display: flex; flex-direction: column; }
+.flip-front svg { height: auto; flex: 1; min-height: 0; }
+.flip-front .ftitle { border-top: 1px solid var(--line); }
+.flip-front .ftitle { font-weight: 700; color: var(--navy); font-size: 14px; line-height: 1.4; text-align: center; padding: 8px 12px 14px; word-break: keep-all; text-wrap: balance; }
+.teaser { color: var(--navy); font-size: 15px; text-align: center; margin: 18px 0 10px !important; word-break: keep-all; text-wrap: balance; line-height: 1.55; }
+.teaser.b { font-weight: 700; }
+.note-c { text-align: center; font-size: 12px; color: var(--muted); margin: 0 0 4px !important; }
+.story { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin: 4px 0 12px; }
+.story h3 { font-size: 15px; color: var(--navy); margin: 0 0 6px; word-break: keep-all; }
+.story p { margin: 0; font-size: 13.5px; }
+.bridge { background: var(--navy-deep); color: var(--cream); border-radius: 14px; padding: 12px 14px; margin: 0 0 6px; font-size: 13.5px; word-break: keep-all; }
+.bridge b { display: block; font-size: 12px; opacity: .8; font-weight: 500; }
+
+.lockwrap { position: relative; margin-top: 6px; }
+.blurred { filter: blur(7px); opacity: .7; user-select: none; pointer-events: none; max-height: 340px; overflow: hidden; -webkit-mask-image: linear-gradient(#000 40%, transparent); mask-image: linear-gradient(#000 40%, transparent); }
+.blurred h4 { color: var(--navy); font-size: 14.5px; margin: 10px 0 4px; }
+.pay { position: relative; z-index: 1; transform: translateZ(0); margin-top: -140px; background: var(--navy-deep); color: var(--cream); border-radius: 18px; padding: 20px 18px 14px; text-align: center; box-shadow: 0 10px 30px #01356655; }
+.pay::before { content: ""; position: absolute; inset: 6px; border: 1px solid var(--cream); border-radius: 13px; opacity: .5; pointer-events: none; }
+.pay.standalone { margin-top: 14px; }
+.pay .ptitle { font-size: 15.5px; font-weight: 700; display: block; margin: 0 0 6px; line-height: 1.45; word-break: keep-all; text-wrap: balance; color: var(--cream); }
+.pay p { font-size: 12.5px; line-height: 1.6; margin: 0 0 4px; color: var(--cream); word-break: keep-all; }
+.pay .price { font-weight: 700; font-size: 13px; margin-top: 6px; }
+.reviews { --row: 2.9em; height: calc(var(--row) * 3); overflow: hidden; margin: 10px 0 6px; font-size: 12px; line-height: 1.45; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 86%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 86%, transparent 100%); }
+.reviews-track.up { animation: rank-up .45s ease forwards; }
+.review-row { height: var(--row); margin: 0 !important; padding: 0 6px; display: flex; align-items: center; justify-content: center; text-align: center; opacity: .9; overflow: hidden; }
+@keyframes rank-up { from { transform: none; } to { transform: translateY(calc(var(--row) * -1)); } }
+.btn { display: block; width: 100%; border: 0; border-radius: 24px; padding: 13px; font-weight: 700; font-size: 14px; margin: 10px 0; text-align: center; min-height: 46px; }
+.btn.fill { background: var(--navy); color: var(--cream); }
+.btn.line { background: transparent; color: var(--navy); border: 1.5px solid var(--navy); }
+.btn.cream { background: var(--cream); color: var(--navy); position: relative; }
+.btn:disabled { opacity: .45; }
+
+.placeholder { border: 1.5px dashed var(--sky-strong); background: var(--white); border-radius: 14px; padding: 16px 14px; margin: 6px 0 12px; text-align: center; }
+.placeholder b { color: var(--navy); display: block; margin-bottom: 4px; }
+.placeholder p { margin: 0; font-size: 12.5px; color: var(--muted); }
+.pcards { display: grid; gap: 10px; margin: 6px 0 12px; }
+.pcard { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; box-shadow: 0 4px 12px #0135660f; }
+.pcard .when { display: inline-block; background: var(--navy); color: var(--cream); font-size: 11.5px; font-weight: 700; border-radius: 10px; padding: 1px 10px; margin-bottom: 6px; }
+.pcard p { margin: 0 0 4px; font-weight: 500; }
+.pcard small { color: var(--muted); font-size: 12px; display: block; line-height: 1.55; }
+.sharerow { display: flex; gap: 10px; margin: 14px 0 0; }
+.sharerow .btn { flex: 1; margin: 0; font-size: 13.5px; padding: 13px 8px; border-radius: 999px; }
+.btn.kakao { background: var(--kakao); color: #191919; }
+
+body.paid .prepay { display: none; }
+body:not(.paid) .postpay { display: none; }
+
+.nav { display: flex; gap: 8px; padding: 10px 16px 14px; background: var(--cream); border-top: 1px solid #01356614; }
+.nav .btn { margin: 0; }
+.nav .btn.line { flex: 0 0 32%; font-size: 13px; }
+.nav .btn.fill { flex: 1; }
+
+/* 휴대폰 안 결제 화면(시트) · 로딩 화면 */
+.dim { position: absolute; inset: 0; z-index: 10; background: #01365Ca6; display: flex; align-items: flex-end; }
+.sheet { position: relative; width: 100%; max-height: 94%; overflow-y: auto; background: var(--cream); border-radius: 22px 22px 0 0; padding: 12px 18px 18px; }
+.sheet .grab { width: 44px; height: 5px; border-radius: 9px; background: #01356633; margin: 0 auto 12px; }
+.sheet h2 { font-size: 18px; color: var(--navy); margin: 0 0 12px; padding-right: 48px; }
+.sheet-x { position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--white); color: var(--navy); font-size: 18px; line-height: 1; }
+.product { border: 1.5px solid var(--navy); border-radius: 16px; padding: 12px 14px; background: var(--white); margin-bottom: 12px; }
+.product .pn { font-weight: 700; margin: 0; word-break: keep-all; }
+.product .pi { font-size: 12.5px; color: var(--muted); margin: 2px 0 6px; }
+.product .pp { font-size: 18px; font-weight: 700; color: var(--navy); margin: 0; }
+.toss { background: #E9EDF1; border: 1px dashed #9AA7B4; color: #4A5663; border-radius: 16px; min-height: 150px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 13px; padding: 12px; margin-bottom: 12px; }
+.agree { display: flex; gap: 8px; align-items: flex-start; font-size: 13.5px; padding: 6px 2px; cursor: pointer; }
+.agree input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--navy); flex: 0 0 auto; }
+.loading { position: absolute; inset: 0; z-index: 11; background: var(--navy-deep); color: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; text-align: center; }
+.loading svg { width: 96px; height: auto; }
+.loading .wv { animation: bob 1.8s ease-in-out infinite; }
+.loading .wv:nth-child(2) { animation-delay: .2s; } .loading .wv:nth-child(3) { animation-delay: .4s; }
+@keyframes bob { 0%,100% { transform: none; } 50% { transform: translateX(5px); } }
+.loading p { margin: 0; font-size: 15px; word-break: keep-all; min-height: 3.2em; }
+.loading small { opacity: .75; font-size: 12px; }
+.loading button { border: 1px solid var(--cream); background: transparent; color: var(--cream); border-radius: 999px; padding: 8px 18px; min-height: 40px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rail { scroll-behavior: auto; }
+  .flip-card { transition: none; }
+  .reviews-track.up { animation: none; transform: translateY(calc(var(--row) * -1)); }
+  .loading .wv { animation: none; }
+  .dots i { transition: none; }
+}
+</style>
+</head>
+<body>
+<main class="stage">
+  <section class="panel ctl" aria-label="시연 버튼">
+    <h2>시연</h2>
+    <div class="ctl-row">
+      <div class="seg" role="group" aria-label="결제 상태">
+        <button type="button" id="btnPre" aria-pressed="true">결제 전</button>
+        <button type="button" id="btnPost" aria-pressed="false">결제 후</button>
+      </div>
+      <button type="button" class="chipbtn" id="btnCheckout">결제 화면 보기</button>
+      <button type="button" class="chipbtn" id="btnLoading">로딩 문구 보기</button>
+    </div>
+  </section>
+
+  <div class="phone" id="phone">
+    <div class="dots" id="dots" aria-hidden="true"></div>
+    <div class="rail" id="rail" tabindex="-1"></div>
+    <nav class="nav" aria-label="쪽 이동">
+      <button type="button" class="btn line" id="prev">돌아가기</button>
+      <button type="button" class="btn fill" id="next">다음으로</button>
+    </nav>
+
+    <div class="dim" id="checkout" hidden>
+      <form class="sheet" id="payForm" role="dialog" aria-modal="true" aria-labelledby="coTitle" novalidate>
+        <div class="grab"></div>
+        <h2 id="coTitle">전체 리포트 결제</h2>
+        <button type="button" class="sheet-x" id="coClose" aria-label="결제 화면 닫기">✕</button>
+        <div class="product">
+          <p class="pn" id="coName"></p>
+          <p class="pi" id="coIncl"></p>
+          <p class="pp" id="coPrice"></p>
+        </div>
+        <div class="toss">토스 결제 수단<br>(실제 위젯 자리)</div>
+        <label class="agree"><input type="checkbox" id="coAgree"><span id="coAgreeText"></span></label>
+        <button type="submit" class="btn fill" id="coPay" disabled></button>
+      </form>
+    </div>
+
+    <div class="loading" id="loading" hidden role="status">
+      <svg viewBox="0 0 96 60" aria-hidden="true"><g fill="none" stroke="#FDF6E9" stroke-width="5" stroke-linecap="round"><path class="wv" d="M10 14c9-9 17 9 26 0s17 9 26 0 17 9 24 0"/><path class="wv" d="M10 30c9-9 17 9 26 0s17 9 26 0 17 9 24 0"/><path class="wv" d="M10 46c9-9 17 9 26 0s17 9 26 0 17 9 24 0"/></g></svg>
+      <p id="loadMsg"></p>
+      <small id="loadSec"></small>
+      <button type="button" id="loadClose">닫기</button>
+    </div>
+  </div>
+
+  <section class="panel cap" aria-label="시안 안내">
+    <p><b>후기 줄 안내</b> — 결제 상자 안에서 돌아가는 세 줄은 자리만 잡아 둔 것입니다. 아직 실제 후기가 없으므로, 동의 받은 파일럿 후기가 들어오기 전까지 이 영역은 실제 화면에서 그리지 않습니다(지어낸 후기 금지).</p>
+    <p>예시: 나 = 민지(수달) · 애칭 = 지훈(가오리) · 고리 "다가갈수록 멀어지는 사이". 무료 문구는 데이터 그대로이고, 레이더 점수·흐림 글·실천 카드·10쪽 안내는 시안용 예시입니다. 캐릭터는 그림 자리 표시입니다.</p>
+    <p>쪽마다 주소가 있습니다: 주소 끝의 #p1 ~ #p10. 좌우 화살표 키로도 넘길 수 있습니다.</p>
+  </section>
+
+  <section class="panel list" aria-label="적용한 결제 유도 포인트">
+    <h2>적용한 결제 유도 포인트</h2>
+    <ol>
+      <li><b>무료로 쌓고 마지막 장만 닫기</b> — 1~3쪽은 전부 무료, 답이 든 "우리가 만나는 곳"만 닫아 둡니다.</li>
+      <li><b>3쪽 멈추는 문단</b> — 두 장이 보여 준 흐름을 정리한 뒤 "어디서 풀리는지는 아직 열리지 않았습니다"에서 멈춥니다.</li>
+      <li><b>4쪽 전용 버튼 문구</b> — 3쪽 다음 버튼은 "우리가 만나는 곳 보러 가기", 4쪽 결제 버튼은 "카드 뒤집고 우리가 만나는 곳 보기".</li>
+      <li><b>가격 줄</b> — 결제 상자 안에 금액을 한 문장으로 먼저 보여 줍니다(정가 취소선·한정 할인 표시는 쓰지 않음).</li>
+      <li><b>후기 순환(실제 후기만)</b> — 세 줄이 보이고 1.5초마다 한 줄씩 올라갑니다. 후기가 없으면 영역을 그리지 않습니다.</li>
+      <li><b>흐림 예시는 가상 예시</b> — 5~9쪽 흐린 글은 누구에게나 같은 예시입니다. 유료 글은 결제 전에는 화면으로 보내지 않습니다.</li>
+      <li><b>결제 후 제자리 뒤집힘</b> — 결제하고 돌아오면 4쪽 그 자리에서 카드가 뒤집히며 열립니다.</li>
+      <li><b>방식별 결제 상자 제목</b> — 내 방식(다가가기·맞춰주기·거리두기·조율하기)에 맞는 제목을 씁니다.</li>
+      <li><b>결제 화면은 바로 결제 수단 + 동의 한 줄</b> — 들어가자마자 상품·가격과 결제 수단, 체크 하나.</li>
+      <li><b>공유는 결제 뒤 · 카카오 우선</b> — 공유 버튼은 4쪽부터, 카카오톡을 맨 앞에 둡니다. 그림과 한 줄만 공유됩니다.</li>
+      <li><b>쪽마다 주소</b> — 10쪽 각각 자기 주소가 있어 새로 고침·뒤로 가기·결제 복귀가 그 쪽으로 돌아옵니다.</li>
+      <li><b>로딩 문구</b> — 결과를 기다리는 동안 3초마다 문장이 바뀌고 경과 초를 함께 보여 줍니다.</li>
+    </ol>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var D = {"vars":{"이름":"민지","애칭":"지훈","A":"민지","B":"지훈","고리":"다가갈수록 멀어지는 사이","price":"2,900원"},"tokens":{"navy":"#013566","navy-deep":"#01365C","cream":"#FDF6E9","white":"#FFFFFF","sky":"#C9D9E8","sky-soft":"#EEF3F8","ink":"#1C2B3A","line":"#D8E1EA"},"titles":["당신은 이런 사람입니다","당신이 보는 {애칭|은} 이럴 거예요","{이름}님과 {애칭}의 사이 풀어보기","우리가 만나는 곳","우리 관계는 보통 이렇게 흘러갑니다","당신이 주로 서운함을 느끼는 순간은...","{애칭|은} 주로 이럴 때 서운함을 느껴요","우리, 더 싸우지 말자! 할 수 있는 방향을 알려드려요","이번 주 실천 카드","쏘웰라와 이어서 이야기하기"],"flow":{"intro":"**{이름}님의 결과를 알려드리겠습니다.** 첫 번째 장은 나, 두 번째 장은 내 눈에 비친 {애칭}, 세 번째 장은 두 사람이 만나는 곳을 보여 줍니다. 먼저 {이름}님이 어떤 사람인지 보겠습니다.","two_title":"지금까지 두 장이 보여 준 것","change_lead":"**그런데 이 흐름 안에는 두 사람이 서로를 지키려던 마음도 함께 있습니다.**","stop":"하지만 이 흐름이 어디서 풀리는지는 아직 열리지 않았습니다. **세 번째 장은 ‘우리가 만나는 곳’입니다.** {이름|과} {애칭|이} 어디서 엇갈리고, 누가 무엇을 먼저 하면 다시 만나는지가 이 장에 있습니다.","next_button":"우리가 만나는 곳 보러 가기","p4_teaser":"{이름}님과 {애칭}의 ‘{고리}’, 이 흐름이 풀리는 자리가 이 카드에 있습니다.","p4_after_pay_note":"결제하면 이 자리에서 카드가 뒤집힙니다.","p4_cta":"카드 뒤집고 우리가 만나는 곳 보기","hidden_alt":"세 번째 장(결제 후 열립니다)","paywall_title":"먼저 다가가도 멀어지지 않는 방법은 리포트에서 이어집니다","paywall_body":"왜 그렇게 흘러가는지, {애칭}에게 무엇을 부탁하면 좋을지, 이번 주에 무엇부터 할지까지 이어서 읽을 수 있습니다.","paywall_price_lead":"지금, {price}으로 우리가 만나는 곳을 열어 보세요.","paywall_button":"{price} 결제하고 이어 읽기","teasers":{"5":"두 사람의 흐름이 왜 되풀이되는지, 그 안에서 각자 무엇을 지키려 했는지","6":"**{이름}님이 유독 서운해지는 세 가지 순간과 그 이유**","7":"{애칭|이} 말하지 않았을 수 있는 서운한 순간 세 가지","8":"내가 바꿔 볼 것, {애칭}에게 부탁할 말, 둘이 함께 정할 약속","9":"오늘, 3일 안에, 이번 주에 해 볼 실천 카드 세 장"},"loading_messages":["{이름}님의 답을 읽고 있습니다..","내 눈에 비친 {애칭}의 모습을 정리하고 있습니다..","두 사람의 방식이 어떻게 맞물리는지 살펴보고 있습니다..","바다 친구들이 두 사람의 자리를 찾고 있습니다..","{이름}님에게 맞는 실천을 고르고 있습니다.."],"generating":"바다 친구들이 리포트를 쓰고 있습니다…","checkout":{"title":"{이름}님과 {애칭}의 전체 리포트","includes":"전체 리포트(5~9쪽) + 1주일 AI 채팅권","agree":"[필수] 이용 관련 약관에 동의합니다","button":"{price} 결제하기","button_need_agree":"약관에 동의하면 결제할 수 있습니다"},"share_note":"그림과 한 줄만 공유됩니다. 답한 내용과 상대의 점수는 공유되지 않습니다."},"me":{"type":"수달","competency":"기대기","mode":"다가가기","desc":"먼저 연락하고 챙기지만, 내 약한 마음은 보여주지 않습니다","free":"당신은 연애에서 먼저 연락하고 약속을 만드는 사람입니다. 연락이 끊기기 전에 먼저 안부를 묻고, 데이트 계획도 세우자마자 실행으로 옮깁니다. {애칭}이 힘들어 보이면 바로 찾아가 챙기고, 기념일이나 작은 날도 잊지 않아서 함께 있는 시간이 늘 따뜻합니다. 어색한 분위기가 흐르면 먼저 말을 꺼내 분위기를 풀어 주는 것도 당신입니다. 다만 챙기느라 바빠서 내 힘든 얘기는 자꾸 뒤로 미루게 되고, {애칭}이 도와주려 할 때 \"내가 할게\" 하고 넘기는 날도 있습니다. 주는 만큼 받지 못하는 시간이 길어지면 혼자 조용히 지칠 수 있습니다.","theory":"Johnson의 정서중심치료(Emotionally Focused Therapy, EFT), Brennan, Clark & Shaver의 애착 불안·회피 차원(Attachment Anxiety and Avoidance Dimensions), Young의 스키마 치료(Schema Therapy)"},"partner":{"type":"가오리","competency":"회복하기","mode":"거리두기","desc":"부딪힌 뒤 연락을 줄이고 조용히 지내다, 잠잠해지면 아무 일 없던 듯 다시 연락합니다","free":"내 눈에 비친 {애칭}은 다툼이 거세질 때 목소리를 높이기보다 조용히 물러나는 사람으로 보입니다. 화난 채로 상처 주는 말을 쏟아내는 일은 드물고, 시간이 지나면 다시 다정하게 돌아오는 편일 수 있습니다. 다만 다툰 뒤 한동안 연락이 뜸해져서, 그 사이 혼자 기다리는 시간이 길게 느껴졌을 수 있습니다. 돌아와서도 다툰 일은 다시 꺼내지 않아 '이대로 넘어간 건가' 싶은 순간이 있을 수도 있습니다. 조용한 시간 동안 {애칭} 안에서 무슨 일이 일어나는지는 내 눈에 보이지 않으니, 편한 때에 직접 물어봐 주세요.","theory":"Gottman의 담쌓기(Stonewalling)와 회복 시도(Repair Attempts), Roth & Cohen의 접근-회피 대처(Approach-Avoidance Coping), Gross의 정서조절 과정모델(Emotion Regulation)"},"pair":{"common":"{A|과} {B} 모두 힘든 마음을 내보이기보다 혼자 다스리는 편이라, 서로의 조용한 버팀을 이해합니다.","diff":"{A|은} 서먹한 공기가 생겨도 먼저 연락해 챙기고, {B|은} 부딪힌 뒤 한동안 연락 없이 지내다 잠잠해지면 아무 일 없던 듯 돌아옵니다."},"rel":{"free":"{이름|과} {애칭|은} 힘든 마음을 내보이기보다 혼자 가라앉히는 편이라, 혼자 조용히 버티는 마음을 서로 이해합니다. {이름|이} 서먹한 날에도 먼저 연락해 챙기면, {애칭|은} 날카로운 말 대신 마음이 가라앉은 뒤 다정하게 다시 연락해 옵니다. 한쪽은 먼저 다가가 관계를 이어 가고, 한쪽은 다툼이 커지지 않게 차분함을 지키는 사이입니다.","one_line":"물풀 정원에 조개껍데기를 두고 온 수달","story":"수달은 약속 장소 문제로 살짝 다툰 뒤, 얕은 바다의 물풀 정원 가장자리를 사흘째 서성였다. 모래 위로 눈만 내놓은 가오리는 수달을 보더니 더 깊이 모래 속으로 가라앉았다. 수달은 \"지금 얘기하자!\"라고 부르고 싶었지만, 부를수록 모래가 더 두껍게 덮일 것만 같았다. 사실 수달도 그날 이후 잠을 설쳤다는 말을 들려주고 싶었다. 수달은 물풀 사이에 작은 조개껍데기를 하나 놓고 말했다. \"쉬고 싶으면 쉬어. 내일 저녁에 여기서 기다릴게.\""},"blur":{"5":"**한쪽이 지금 풀자고 다가갈수록 다른 한쪽은 생각할 시간이 더 필요해지는 사이입니다.** 먼저 다가가는 쪽에게는 바로 이야기하는 것이 관계를 지키는 방법이고, 시간이 필요한 쪽에게는 잠시 물러나는 것이 다툼을 키우지 않는 방법입니다. 두 방법이 만나면 서로를 더 세게 부추기게 됩니다.\n\n예를 들어 저녁에 말다툼을 하고 전화를 끊은 날, 먼저 다가가는 쪽은 10분 뒤 \"아까 그 얘기 지금 하자\"라고 메시지를 보낼 수 있습니다. 시간이 필요한 쪽은 무슨 말을 해야 할지 정리되지 않아 답을 미루고, 읽지 않은 메시지가 세 개, 네 개로 늘어납니다. 다음 날 아침 \"잘 잤어?\"로 대화는 다시 이어지지만, 어젯밤 이야기는 아무도 꺼내지 않은 채 남습니다.\n\n이 흐름 안에서 한쪽은 관계를 놓지 않으려 했고, 다른 한쪽은 아마 더 상처 주는 말을 피하려 했을 것입니다.","6":"**먼저 다가가는 쪽은 대답이 없는 시간이 길어질 때 가장 서운해집니다.**\n\n• 다툰 뒤 메시지에 몇 시간째 답이 없을 때\n\"얘기 좀 하자\"를 보내고 휴대폰을 몇 번이나 확인하는 밤이 있을 수 있습니다. 겉으로는 \"왜 답을 안 해?\"라는 말이 나가지만, 속에서는 '내가 이 사람에게 덜 중요한가' 하는 걱정이 먼저입니다.\n\n• \"나중에 얘기하자\"만 듣고 그 나중이 오지 않을 때\n언제인지 모르는 기다림은 하루가 지나도 끝나지 않습니다. 그래서 다시 묻게 되고, 묻는 자신이 싫어지기도 합니다.\n\n• 용기 내어 속마음을 말했는데 \"알겠어\" 한마디로 끝날 때\n길게 꺼낸 말에 짧은 답이 돌아오면, 말한 내용이 어디까지 닿았는지 알 수 없습니다. 이 순간이 유독 아픈 이유는 침묵이 거절처럼 읽히기 때문입니다.","7":"**시간이 필요한 쪽은 생각을 정리하기도 전에 답을 요구받을 때 서운할 수 있습니다.**\n\n• 퇴근 직후 \"지금 얘기해\"를 들을 때\n회의가 이어진 날 집에 오자마자 어제 일을 꺼내면, 대화가 싫어서가 아니라 말할 힘이 남지 않아 입을 닫게 될 수 있습니다.\n\n• 물러난 것을 \"넌 관심이 없구나\"로 받을 때\n더 심한 말이 나올까 봐 잠시 멈춘 것인데 무심한 사람으로 읽히면, 억울한 마음에 더 말이 없어질 수 있습니다.\n\n• 겨우 꺼낸 한마디에 질문이 이어질 때\n\"그게 다야? 그래서 어떻게 할 건데?\"가 뒤따르면, 다음에는 그 한마디도 꺼내기 어려워질 수 있습니다.\n\n어디까지나 다가가는 쪽의 눈에 비친 모습이라, 그 침묵 안에 무엇이 있었는지는 직접 물어보는 것이 가장 정확합니다.","8":"**이 사이를 푸는 열쇠는 '지금이냐 나중이냐'가 아니라 '언제 돌아오는지'를 아는 것입니다.** 돌아올 시간을 아는 기다림과 모르는 기다림은 전혀 다르게 느껴집니다.\n\n첫째, 먼저 다가가는 쪽은 메시지를 여러 번 보내는 대신 \"나는 오늘 안에 10분만 얘기하고 싶어\" 한 문장으로 줄여 보세요. 이렇게 제안하는 이유는 원하는 것이 분명할수록 상대가 답하기 쉬워지기 때문입니다.\n\n둘째, 상대에게는 \"시간이 필요하면 몇 시쯤 얘기할 수 있는지만 알려 줘, 그럼 그때까지 기다릴게\"라고 부탁해 볼 수 있습니다. 이 부탁은 물러날 자리와 기다릴 근거를 함께 만들어 줍니다.\n\n셋째, 다툰 날에는 \"오늘은 여기까지, 내일 저녁 8시에 다시\"처럼 다시 만날 시간을 둘이 함께 정해 두는 것입니다. 약속한 시간에 먼저 말을 꺼내는 일은 시간이 필요했던 쪽이 맡으면 균형이 맞습니다.","9":"**이번 주에는 기다림에 시간을 붙이는 연습 세 가지를 해 봅니다.**\n\n• 오늘 · 혼자 5분\n자기 전, 답을 기다리며 가장 힘들었던 순간이나 재촉받아 가장 막막했던 순간 하나를 메모장에 적어 보세요. 그 옆에 \"그때 내가 듣고 싶었던 말\"을 한 줄 덧붙이면 다음에 부탁할 문장이 됩니다.\n\n• 3일 안에 · 건네는 한 문장 3분\n다투지 않은 평온한 저녁에 \"다음에 우리 부딪히면 언제 다시 얘기할지만 먼저 정하자\"를 건네 보세요. 약속은 다툼 한가운데가 아니라 괜찮은 날에 만들어야 지켜집니다.\n\n• 이번 주 · 함께 10분\n주말에 만나 둘만의 '쉬었다 하자' 문장과 기본 시간을 정해 보세요. 예를 들어 \"한 시간 뒤에 전화할게\"처럼, 쉬는 길이와 다시 연락하는 사람을 함께 정합니다."},"cards":[{"slot":"오늘","title":"혼자 떠안은 일 옆에 '부탁 못 한 이유' 적기","how":"이번 주에 혼자 처리한 일 가운데 {애칭}에게 부탁할 수도 있었던 일 하나를 메모장에 적어 보세요. 그 옆에 부탁하지 않은 이유를 한 줄만 덧붙입니다. 오늘은 부탁하려고 애쓰지 말고 이유만 모아 보세요.","cue":"다음에 {애칭|이} \"내가 할까?\" 하고 물었는데 \"내가 할게\"가 먼저 나올 때","minutes":5,"format":"글"},{"slot":"3일 안에","title":"칭찬을 '아니에요' 대신 '고마워요'로 한 번 받기","how":"{애칭|이} 짐을 들어 주거나 안부를 물어 줄 때 \"괜찮아\" 대신 \"고마워, 덕분에 편하다\" 한마디로만 받아 보세요. 어색해도 그대로 두고, 받은 뒤 어떤 느낌이었는지 한 줄 적어 둡니다.","cue":"다음에 {애칭|이} 먼저 챙겨 주려고 할 때","minutes":3,"format":"말"},{"title":"피하고 싶을 때 '돌아올 약속' 한 문장 말하고 돌아오기","how":"부딪힌 뒤 쉬고 싶어질 때 쓸 문장을 둘이 함께 정해 두세요. \"네가 싫어서가 아니라 머리가 복잡해서 그래. 한 시간 쉬고 9시에 다시 얘기하자\"처럼 이유와 돌아올 시간을 담습니다. 정한 시간에는 한마디라도 이어 갑니다.","cue":"다음에 {A|은} 지금 풀고 싶고 {B|은} 자리를 피하고 싶어질 때","minutes":10,"format":"말","slot":"이번 주"}],"loop":{"name":"다가갈수록 멀어지는 사이","trigger":"부딪힌 일이 생깁니다.","A":"{A|은} 지금 풀자며 다가갑니다.","B":"{B|은} 시간이 필요해 한 발 물러납니다.","mesh":"한쪽은 관계를 놓지 않으려는 힘을, 한쪽은 잠시 물러나 감정을 가라앉히는 힘을 갖고 있습니다.","bridge":"{B|은} 언제 돌아올지 알려 주고, {A|은} 그때까지 기다려 주기"}};
+
+  /* ── josa.js 옮김 ── */
+  var DIGIT = { 0: true, 1: true, 2: false, 3: true, 4: false, 5: false, 6: true, 7: true, 8: true, 9: false };
+  function hasBatchim(word) {
+    var ch = String(word).trim().slice(-1);
+    if (ch in DIGIT) return DIGIT[ch];
+    var code = ch.charCodeAt(0);
+    if (code < 0xac00 || code > 0xd7a3) return false;
+    return (code - 0xac00) % 28 !== 0;
+  }
+  var PAIRS = { 은: ["은", "는"], 는: ["은", "는"], 이: ["이", "가"], 가: ["이", "가"], 을: ["을", "를"], 를: ["을", "를"], 과: ["과", "와"], 와: ["과", "와"], 으로: ["으로", "로"], 로: ["으로", "로"], 이에요: ["이에요", "예요"], 예요: ["이에요", "예요"], 이라서: ["이라서", "라서"], 라서: ["이라서", "라서"] };
+  function josa(word, p) {
+    if (p === "도") return "도";
+    var pair = PAIRS[p];
+    if (!pair) throw new Error("지원하지 않는 조사: " + p);
+    return hasBatchim(word) ? pair[0] : pair[1];
+  }
+  function normalizeItemText(t) {
+    return t.replace(/\{([^}|]+)\}(이에요|예요|이라서|라서|으로|은|는|이|가|을|를|과|와|로)(?=의|[^가-힣]|$)/g, function (_, k, p) { return "{" + k + "|" + p + "}"; });
+  }
+  function render(tpl, vars) {
+    return tpl.replace(/\{([^}|]+)(?:\|([^}]+))?\}/g, function (_, key, p) {
+      if (!(key in vars)) throw new Error("템플릿 변수 없음: " + key);
+      var v = String(vars[key]);
+      if (!p) return v;
+      if (v === "나" && (p === "이" || p === "가")) return "내가";
+      return v + josa(v, p);
+    });
+  }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  /* 문구 → 조사 처리 → HTML(**굵게**만 허용) */
+  function T(tpl) { return render(normalizeItemText(tpl), D.vars); }
+  function H(tpl) { return esc(T(tpl)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+
+  var V = D.vars, F = D.flow, N = 10;
+
+  /* ── 그림(모두 인라인 SVG, 캐릭터는 자리 표시) ── */
+  function otterG() {
+    return '<g stroke="#013566" stroke-width="2.5" stroke-linejoin="round">' +
+      '<circle cx="35" cy="40" r="10" fill="#FDF6E9"/><circle cx="85" cy="40" r="10" fill="#FDF6E9"/>' +
+      '<ellipse cx="60" cy="66" rx="36" ry="31" fill="#FDF6E9"/></g>' +
+      '<circle cx="40" cy="74" r="6" fill="#C9D9E8"/><circle cx="80" cy="74" r="6" fill="#C9D9E8"/>' +
+      '<circle cx="47" cy="62" r="3.4" fill="#013566"/><circle cx="73" cy="62" r="3.4" fill="#013566"/>' +
+      '<ellipse cx="60" cy="71" rx="5" ry="3.6" fill="#013566"/>' +
+      '<path d="M53 78q7 6 14 0" fill="none" stroke="#013566" stroke-width="2.2" stroke-linecap="round"/>';
+  }
+  function rayG() {
+    return '<path d="M60 96q7 10-3 20" fill="none" stroke="#013566" stroke-width="2.5" stroke-linecap="round"/>' +
+      '<path d="M60 28C84 36 106 52 110 64 98 80 80 94 60 96 40 94 22 80 10 64 14 52 36 36 60 28Z" fill="#C9D9E8" stroke="#013566" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<circle cx="38" cy="70" r="6" fill="#FDF6E9"/><circle cx="82" cy="70" r="6" fill="#FDF6E9"/>' +
+      '<circle cx="49" cy="60" r="3.4" fill="#013566"/><circle cx="71" cy="60" r="3.4" fill="#013566"/>' +
+      '<path d="M53 71q7 6 14 0" fill="none" stroke="#013566" stroke-width="2.2" stroke-linecap="round"/>';
+  }
+  var CHAR = { "수달": otterG, "가오리": rayG };
+  function blob(type, bg) {
+    return '<svg viewBox="0 0 120 120" role="img" aria-label="' + esc(type) + ' 캐릭터 그림 자리"><circle cx="60" cy="60" r="58" fill="' + (bg || "#EEF3F8") + '"/>' + CHAR[type]() + "</svg>";
+  }
+  function waves(cx, cy, s, color) {
+    var p = "c6-6 11 6 17 0s11 6 17 0 11 6 17 0";
+    return '<g fill="none" stroke="' + color + '" stroke-width="' + (3.2 / s) + '" stroke-linecap="round" transform="translate(' + cx + " " + cy + ") scale(" + s + ')">' +
+      '<path d="M-25.5-11' + p + '"/><path d="M-25.5 0' + p + '"/><path d="M-25.5 11' + p + '"/></g>';
+  }
+  function cardBack(q) {
+    return '<svg viewBox="0 0 200 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="' + esc(F.hidden_alt) + '">' +
+      '<rect width="200" height="300" fill="#01365C"/>' +
+      '<rect x="9" y="9" width="182" height="282" rx="10" fill="none" stroke="#FDF6E9" stroke-width="1.6"/>' +
+      '<rect x="15" y="15" width="170" height="270" rx="7" fill="none" stroke="#FDF6E9" stroke-width=".8" opacity=".7"/>' +
+      '<circle cx="100" cy="' + (q ? 128 : 150) + '" r="40" fill="none" stroke="#FDF6E9" stroke-width=".8" opacity=".5"/>' +
+      waves(100, q ? 128 : 150, 1.25, "#FDF6E9") +
+      (q ? '<text x="100" y="222" text-anchor="middle" font-size="44" font-weight="700" fill="#FDF6E9" font-family="Noto Sans KR, sans-serif">?</text>' : "") +
+      "</svg>";
+  }
+  function meetArt() {
+    return '<svg viewBox="0 -50 200 250" preserveAspectRatio="xMidYMid slice" role="img" aria-label="두 캐릭터가 물풀 정원에서 만나는 그림 자리">' +
+      '<rect y="-50" width="200" height="250" fill="#EEF3F8"/>' +
+      '<g fill="none" stroke="#C9D9E8" stroke-width="3" stroke-linecap="round"><path d="M30-14c6-6 11 6 17 0s11 6 17 0"/><path d="M130 6c6-6 11 6 17 0s11 6 17 0"/></g>' +
+      '<path d="M0 150c20-10 40 10 60 0s40 10 60 0 40 10 80 0v50H0Z" fill="#C9D9E8" opacity=".7"/>' +
+      '<path d="M22 150c-6-22 8-34 0-58M36 150c6-18-6-30 2-46M172 150c6-20-8-30 0-52" fill="none" stroke="#7FA3C4" stroke-width="4" stroke-linecap="round"/>' +
+      '<g transform="translate(8 44) scale(.82)">' + otterG() + "</g>" +
+      '<g transform="translate(96 50) scale(.82)">' + rayG() + "</g>" +
+      '<path d="M92 150a9 8 0 0 1 18 0Z" fill="#FDF6E9" stroke="#013566" stroke-width="2" stroke-linejoin="round"/>' +
+      '<path d="M101 150v-7M96 150l2-6M106 150l-2-6" stroke="#013566" stroke-width="1.2" stroke-linecap="round"/>' +
+      "</svg>";
+  }
+  function radar() {
+    var axes = ["기대기", "믿기", "선 지키기", "말하기", "회복하기"];
+    var mine = [1.8, 3.2, 2.9, 3.0, 2.7], yours = [2.6, 2.9, 3.1, 2.4, 1.6]; /* 시안용 예시 점수(1~4) */
+    var cx = 160, cy = 132, R = 84;
+    function pt(i, r) { var a = -Math.PI / 2 + i * 2 * Math.PI / 5; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; }
+    function poly(vals) { return vals.map(function (v, i) { var p = pt(i, R * v / 4); return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" "); }
+    var s = '<svg viewBox="0 0 320 250" role="img" aria-label="다섯 영역 레이더: 나와 ' + esc(V["애칭"]) + '의 예시 점수 겹침">';
+    [1, 2, 3, 4].forEach(function (k) { s += '<polygon points="' + poly([k, k, k, k, k]) + '" fill="none" stroke="#D8E1EA" stroke-width="1"/>'; });
+    axes.forEach(function (a, i) {
+      var e = pt(i, R), l = pt(i, R + 20);
+      s += '<line x1="' + cx + '" y1="' + cy + '" x2="' + e[0].toFixed(1) + '" y2="' + e[1].toFixed(1) + '" stroke="#D8E1EA" stroke-width="1"/>';
+      var anchor = Math.abs(l[0] - cx) < 4 ? "middle" : l[0] > cx ? "start" : "end";
+      s += '<text x="' + (anchor === "middle" ? l[0] : l[0] + (l[0] > cx ? -8 : 8)).toFixed(1) + '" y="' + (l[1] + 4).toFixed(1) + '" text-anchor="' + anchor + '" font-size="12" fill="#1C2B3A" font-family="Noto Sans KR, sans-serif">' + a + "</text>";
+    });
+    s += '<polygon points="' + poly(yours) + '" fill="#C9D9E8" fill-opacity=".65" stroke="#7FA3C4" stroke-width="2" stroke-linejoin="round"/>';
+    s += '<polygon points="' + poly(mine) + '" fill="#013566" fill-opacity=".18" stroke="#013566" stroke-width="2" stroke-linejoin="round"/>';
+    return s + "</svg>";
+  }
+
+  /* ── 결제 상자 · 후기 순환 ── */
+  /* 실제 후기가 아님: 자리 표시 6줄. 실제 화면은 paywall_reviews가 비어 있으면 이 영역을 그리지 않는다. */
+  var REVIEWS = [1, 2, 3, 4, 5, 6].map(function (n) { return "(실제 후기 자리 " + n + " — 파일럿 후기를 받은 문장 그대로)"; });
+  (function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } })(REVIEWS);
+  var REVIEW_MS = 1500, REVIEW_ROWS = 3, tick = 0;
+  function reviewRows(moving) {
+    var n = REVIEWS.length, h = "";
+    for (var i = 0; i < REVIEW_ROWS + (moving ? 1 : 0); i++) {
+      var k = tick - (moving ? 1 : 0) + i;
+      h += '<p class="review-row">' + esc(REVIEWS[((k % n) + n) % n]) + "</p>";
+    }
+    return h;
+  }
+  function payBox(standalone, label) {
+    return '<div class="pay prepay' + (standalone ? " standalone" : "") + '">' +
+      '<b class="ptitle">' + H(F.paywall_title) + "</b>" +
+      "<p>" + H(F.paywall_body) + "</p>" +
+      '<p class="price">' + H(F.paywall_price_lead) + "</p>" +
+      '<div class="reviews" aria-hidden="true"><div class="reviews-track">' + reviewRows(false) + "</div></div>" +
+      '<button type="button" class="btn cream" data-act="checkout">' + H(label) + "</button></div>";
+  }
+
+  /* ── 흐림 예시(누구에게나 같은 가상 예시, 이름 없음) · 결제 후 자리 표시 ── */
+  /* 흐림 예시 = 데이터 result_flow.blur_samples(우리 고리별 가상 예시) */
+  function blurHtml(txt) {
+    return txt.split(/\n+/).map(function (ln) {
+      var s = esc(ln).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+      return /^• /.test(ln) ? "<h4>" + s + "</h4>" : "<p>" + s + "</p>";
+    }).join("");
+  }
+  var AFTER = {
+    5: "두 사람의 흐름이 되풀이되는 이유와, 그 안에서 각자 지키려던 것",
+    6: "유독 서운해지는 세 가지 순간과 그 이유",
+    7: "말하지 않았을 수 있는 서운한 순간 세 가지",
+    8: "내가 바꿔 볼 것 · 부탁할 말 · 둘이 함께 정할 약속"
+  };
+  function lockPage(n) {
+    var blur = blurHtml(D.blur[n]);
+    var tz = F.teasers[n], bold = /^\*\*/.test(tz);
+    var h = '<p class="teaser prepay' + (bold ? " b" : "") + '">' + esc(T(tz)).replace(/\*\*/g, "") + "</p>" +
+      '<div class="lockwrap prepay"><div class="blurred" aria-hidden="true">' + blur + "</div>" + payBox(false, F.paywall_button) + "</div>";
+    if (n < 9) {
+      h += '<div class="postpay"><div class="placeholder"><b>결제 후에는 AI 리포트가 이 자리에 채워집니다</b><p>' + esc(AFTER[n]) + "</p></div>" +
+        '<p class="small">' + esc(T(F.generating)) + " (리포트를 만드는 동안 보이는 문구)</p></div>";
+    } else {
+      var cards = D.cards.map(function (c) { return [c.slot + " · " + c.minutes + "분", c.title, c.how, c.cue]; });
+      h += '<div class="postpay"><p class="small"><span class="demo-tag">예시</span>실천 DB에서 고른 카드 3장입니다(오늘·3일 안에는 내 유형, 이번 주는 우리 고리). 결제 후 AI가 두 사람 장면에 맞춘 이유 한 줄을 덧붙입니다.</p><div class="pcards">' +
+        cards.map(function (c) { return '<div class="pcard"><span class="when">' + esc(c[0]) + "</span><p><b>" + H(c[1]) + "</b></p><p>" + H(c[2]) + "</p><small>" + H(c[3]) + "</small></div>"; }).join("") + "</div></div>";
+    }
+    return h;
+  }
+  function shareRow() {
+    return '<div class="sharerow"><button type="button" class="btn kakao">카카오톡으로 공유</button><button type="button" class="btn line">저장하기</button></div>' +
+      '<p class="small" style="text-align:center;margin-top:8px">' + H(F.share_note) + "</p>";
+  }
+
+  /* ── 10쪽 본문 ── */
+  function typeCard(who, p) {
+    return '<div class="typecard"><span class="blob">' + blob(p.type) + "</span>" +
+      '<p class="who">' + esc(who) + '</p><p class="tname">' + esc(p.type) + "</p>" +
+      '<div class="chips"><span>' + esc(p.competency) + "</span><span>" + esc(p.mode) + "</span></div>" +
+      '<p class="desc">' + H(p.desc) + "</p></div>";
+  }
+  var BODY = [
+    function () {
+      return "<p>" + H(F.intro) + "</p>" + typeCard(V["이름"] + "님은", D.me) +
+        "<p>" + H(D.me.free) + "</p>" +
+        '<p class="small theory">관련 이론 · ' + esc(D.me.theory) + "</p>";
+    },
+    function () {
+      return typeCard("내 눈에 비친 " + V["애칭"], D.partner) + "<p>" + H(D.partner.free) + "</p>" +
+        '<div class="radar"><h3>두 사람 겹쳐 보기 <span class="demo-tag">예시 점수</span></h3>' + radar() +
+        '<div class="legend"><span><i style="background:#013566"></i>나</span><span><i style="background:#C9D9E8;border:1.5px solid #7FA3C4"></i>' + esc(V["애칭"]) + "</span></div></div>";
+    },
+    function () {
+      var L = D.loop;
+      return '<div class="strip">' +
+        '<div class="scard">' + blob(D.me.type) + '<span class="cap1">나</span><span class="cap2">' + esc(D.me.type) + "</span></div>" +
+        '<div class="scard">' + blob(D.partner.type) + '<span class="cap1">' + esc(V["애칭"]) + '</span><span class="cap2">' + esc(D.partner.type) + "</span></div>" +
+        '<div class="scard back">' + cardBack(true) + "</div></div>" +
+        '<p class="hint">' + esc(F.hidden_alt) + "</p>" +
+        '<div class="twolines"><p class="common">' + H(D.pair.common) + "</p><p>" + H(D.pair.diff) + "</p></div>" +
+        "<p>" + H(D.rel.free) + "</p>" +
+        '<div class="softbox"><h3>' + H(F.two_title) + '</h3><span class="loopname">' + esc(L.name) + "</span><ol>" +
+        "<li><span>계기</span>" + H(L.trigger) + "</li>" +
+        "<li><span>" + esc(V["이름"]) + "</span>" + H(L.A) + "</li>" +
+        "<li><span>" + esc(V["애칭"]) + "</span>" + H(L.B) + "</li></ol></div>" +
+        "<p>" + H(F.change_lead) + " " + H(L.mesh) + "</p>" +
+        '<p class="stop">' + H(F.stop) + "</p>";
+    },
+    function () {
+      return '<div class="bigcard"><div class="flip-card" id="flip">' +
+        '<div class="flip-face">' + cardBack(false) + "</div>" +
+        '<div class="flip-face flip-front">' + meetArt() + '<div class="ftitle">' + esc(D.rel.one_line) + "</div></div></div></div>" +
+        '<p class="teaser b prepay">' + H(F.p4_teaser) + "</p>" +
+        '<p class="note-c prepay">' + H(F.p4_after_pay_note) + "</p>" +
+        payBox(true, F.p4_cta) +
+        '<div class="postpay"><div class="story"><h3>' + esc(D.rel.one_line) + "</h3><p>" + esc(D.rel.story) + "</p></div>" +
+        '<div class="bridge"><b>다리 놓기</b>' + H(D.loop.bridge) + "</div>" + shareRow() + "</div>";
+    },
+    function () { return lockPage(5); }, function () { return lockPage(6); }, function () { return lockPage(7); },
+    function () { return lockPage(8); }, function () { return lockPage(9); },
+    function () {
+      return '<p class="teaser prepay">리포트를 열면 1주일 AI 채팅권으로 쏘웰라와 이어서 이야기할 수 있습니다.</p>' + payBox(true, F.paywall_button) +
+        '<div class="postpay"><div class="story"><h3>1주일 AI 채팅권이 열렸습니다 <span class="demo-tag">예시 문구</span></h3>' +
+        "<p>" + H("쏘웰라가 {이름}님의 결과와 이번 주 실천 카드를 이어받아 이야기를 나눕니다. 오늘 해 본 실천이 어땠는지부터 들려주세요.") + "</p></div>" +
+        '<button type="button" class="btn fill">오늘 해 본 실천을 이어서 이야기하기</button>' + shareRow() + "</div>";
+    }
+  ];
+
+  /* ── 그리기 ── */
+  var rail = document.getElementById("rail"), dots = document.getElementById("dots");
+  var prev = document.getElementById("prev"), next = document.getElementById("next");
+  var html = "", dh = "";
+  for (var i = 0; i < N; i++) {
+    html += '<section class="page" id="page' + (i + 1) + '" aria-label="' + (i + 1) + "쪽 " + esc(T(D.titles[i])) + '">' +
+      '<header class="ph"><h1>' + H(D.titles[i]) + '</h1><span class="no">' + (i + 1) + " / " + N + "</span></header>" +
+      '<div class="pbody">' + BODY[i]() + "</div></section>";
+    dh += "<i" + (i >= 3 && i <= 8 ? ' class="lock"' : "") + "></i>";
+  }
+  rail.innerHTML = html;
+  dots.innerHTML = dh;
+
+  /* ── 쪽 이동(#p1..#p10) ── */
+  var cur = 1;
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function paint() {
+    Array.prototype.forEach.call(dots.children, function (d, i) { d.classList.toggle("on", i === cur - 1); });
+    prev.disabled = cur === 1;
+    next.disabled = cur === N;
+    next.textContent = cur === 3 ? T(F.next_button) : cur === N ? "마지막 쪽입니다" : "다음으로";
+  }
+  function setHash() {
+    try { history.replaceState(null, "", "#p" + cur); } catch (e) { /* 미리보기 환경에서 막혀도 화면은 그대로 동작 */ }
+  }
+  var busy = 0, busyT; /* 버튼·주소로 넘기는 동안에는 스크롤 위치로 쪽 번호를 되읽지 않음 */
+  function go(n, instant) {
+    cur = Math.max(1, Math.min(N, n));
+    busy = 1; clearTimeout(busyT); busyT = setTimeout(function () { busy = 0; }, 700);
+    rail.scrollTo({ left: (cur - 1) * rail.clientWidth, behavior: instant || reduce ? "auto" : "smooth" });
+    paint(); setHash();
+  }
+  var st;
+  rail.addEventListener("scroll", function () {
+    clearTimeout(st);
+    st = setTimeout(function () {
+      var n = Math.round(rail.scrollLeft / rail.clientWidth) + 1;
+      if (!busy && n !== cur) { cur = n; paint(); setHash(); }
+    }, 90);
+  });
+  prev.addEventListener("click", function () { go(cur - 1); });
+  next.addEventListener("click", function () { go(cur + 1); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { closeCheckout(); closeLoading(); return; }
+    if (!checkout.hidden || !loading.hidden) return;
+    var t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
+    if (e.key === "ArrowRight") { go(cur + 1); e.preventDefault(); }
+    else if (e.key === "ArrowLeft") { go(cur - 1); e.preventDefault(); }
+  });
+  function fromHash() {
+    var m = /^#p(\d{1,2})$/.exec(location.hash);
+    return m ? +m[1] : 0;
+  }
+  window.addEventListener("hashchange", function () { var n = fromHash(); if (n && n !== cur) go(n); });
+  window.addEventListener("resize", function () { rail.scrollTo({ left: (cur - 1) * rail.clientWidth, behavior: "auto" }); });
+
+  /* ── 후기 순환: 1.5초마다 한 줄씩 위로 ── */
+  setInterval(function () {
+    if (document.hidden || document.body.classList.contains("paid")) return;
+    tick++;
+    Array.prototype.forEach.call(document.querySelectorAll(".reviews"), function (box) {
+      var tr = document.createElement("div");
+      tr.className = "reviews-track up";
+      tr.innerHTML = reviewRows(true);
+      box.replaceChild(tr, box.firstChild);
+    });
+  }, REVIEW_MS);
+
+  /* ── 결제 전/후 ── */
+  var btnPre = document.getElementById("btnPre"), btnPost = document.getElementById("btnPost");
+  var flip = document.getElementById("flip"), flipT;
+  var FLIP_DELAY_MS = 700;
+  function setPaid(on) {
+    document.body.classList.toggle("paid", on);
+    btnPre.setAttribute("aria-pressed", String(!on));
+    btnPost.setAttribute("aria-pressed", String(on));
+    Array.prototype.forEach.call(dots.children, function (d, i) { d.classList.toggle("lock", !on && i >= 3 && i <= 8); });
+    clearTimeout(flipT);
+    flip.classList.remove("is-flipped");
+    if (on) {
+      go(4);
+      document.getElementById("page4").scrollTop = 0;
+      flipT = setTimeout(function () { flip.classList.add("is-flipped"); }, FLIP_DELAY_MS);
+    }
+  }
+  btnPre.addEventListener("click", function () { setPaid(false); });
+  btnPost.addEventListener("click", function () { setPaid(true); });
+
+  /* ── 결제 화면(시트) ── */
+  var checkout = document.getElementById("checkout"), coAgree = document.getElementById("coAgree"), coPay = document.getElementById("coPay");
+  var lastFocus = null;
+  document.getElementById("coName").textContent = T(F.checkout.title);
+  document.getElementById("coIncl").textContent = T(F.checkout.includes);
+  document.getElementById("coPrice").textContent = V.price;
+  document.getElementById("coAgreeText").textContent = T(F.checkout.agree);
+  function syncAgree() {
+    coPay.disabled = !coAgree.checked;
+    coPay.textContent = T(coAgree.checked ? F.checkout.button : F.checkout.button_need_agree);
+  }
+  function openCheckout() {
+    closeLoading();
+    lastFocus = document.activeElement;
+    coAgree.checked = false; syncAgree();
+    checkout.hidden = false;
+    rail.inert = true;
+    document.getElementById("coClose").focus();
+  }
+  function closeCheckout() {
+    if (checkout.hidden) return;
+    checkout.hidden = true;
+    rail.inert = false;
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  coAgree.addEventListener("change", syncAgree);
+  document.getElementById("coClose").addEventListener("click", closeCheckout);
+  checkout.addEventListener("click", function (e) { if (e.target === checkout) closeCheckout(); });
+  document.getElementById("payForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!coAgree.checked) return;
+    closeCheckout();
+    setPaid(true); /* 시안: 결제 성공으로 돌아온 것처럼 4쪽에서 카드가 뒤집힘 */
+  });
+  document.getElementById("btnCheckout").addEventListener("click", openCheckout);
+  rail.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-act=checkout]");
+    if (b) openCheckout();
+  });
+
+  /* ── 로딩 문구(3초마다 한 줄, 경과 초) ── */
+  var loading = document.getElementById("loading"), loadI;
+  function closeLoading() { if (loading.hidden) return; clearInterval(loadI); loading.hidden = true; rail.inert = false; }
+  document.getElementById("btnLoading").addEventListener("click", function () {
+    closeCheckout();
+    var sec = 0, msgs = F.loading_messages;
+    function show() {
+      document.getElementById("loadMsg").textContent = T(msgs[Math.floor(sec / 3) % msgs.length]);
+      document.getElementById("loadSec").textContent = sec + "초";
+    }
+    clearInterval(loadI); show();
+    loading.hidden = false; rail.inert = true;
+    document.getElementById("loadClose").focus();
+    loadI = setInterval(function () { sec++; if (sec >= msgs.length * 3) { closeLoading(); return; } show(); }, 1000);
+  });
+  document.getElementById("loadClose").addEventListener("click", closeLoading);
+
+  /* 시작 */
+  syncAgree();
+  cur = fromHash() || 1;
+  paint();
+  requestAnimationFrame(function () { go(cur, true); });
+})();
+</script>
+</body>
+</html>

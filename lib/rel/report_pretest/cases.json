@@ -1,0 +1,375 @@
+[
+ {
+  "id": "case01",
+  "sample_no": 1,
+  "label": "물개 → 복어 (민수, 연애)",
+  "nickname": "민수",
+  "relationship": "연애",
+  "self": {
+   "기대기": [3, 3, 2, 4],
+   "믿기": [4, 2, 4, 2],
+   "선 지키기": [2, 2, 4, 2],
+   "말하기": [1, 3, 3, 2],
+   "회복하기": [4, 2, 3, 4]
+  },
+  "self_mode_votes": ["다가가기", "다가가기", "조율하기", "다가가기"],
+  "partner": {
+   "기대기": [2, 3],
+   "믿기": [4, 2],
+   "선 지키기": [2, 1],
+   "말하기": [3, 2],
+   "회복하기": [4, 4]
+  },
+  "partner_mode_votes": ["다가가기", "다가가기", "거리두기", "다가가기"],
+  "notable": [4, 9, 21, 29, 30],
+  "expect": {
+   "my_type": "물개",
+   "partner_type": "복어",
+   "loop": "서로 먼저 맞서는 사이",
+   "mismatch": {
+    "competency": "선 지키기",
+    "key": "me_higher"
+   },
+   "balance": "balanced",
+   "inner_outer": {
+    "key": "default"
+   }
+  }
+ },
+ {
+  "id": "case02",
+  "sample_no": 2,
+  "label": "원앙 → 소라게 (지훈, 연애)",
+  "nickname": "지훈",
+  "relationship": "연애",
+  "self": {
+   "기대기": [3, 3, 3, 3],
+   "믿기": [2, 1, 1, 1],
+   "선 지키기": [2, 4, 2, 3],
+   "말하기": [3, 2, 3, 4],
+   "회복하기": [3, 3, 2, 2]
+  },
+  "self_mode_votes": ["다가가기", "다가가기", "조율하기", "다가가기"],
+  "partner": {
+   "기대기": [3, 3],
+   "믿기": [4, 3],
+   "선 지키기": [2, 1],
+   "말하기": [4, 3],
+   "회복하기": [3, 2]
+  },
+  "partner_mode_votes": ["맞춰주기", "맞춰주기", "거리두기", "맞춰주기"],
+  "notable": [2, 7, 15, 20, 29, 30],
+  "expect": {
+   "my_type": "원앙",
+   "partner_type": "소라게",
+   "loop": "한쪽이 더 맞춰주는 사이",
+   "mismatch": {
+    "competency": "믿기",
+    "key": "partner_higher"
+   },
+   "balance": "balanced",
+   "inner_outer": {
+    "key": "default"
+   }
+  }
+ },
+ {
+  "id": "case03",
+  "sample_no": 3,
+  "label": "문어 → 혹등고래 (서준, 연애)",
+  "nickname": "서준",
+  "relationship": "연애",
+  "self": {
+   "기대기": [3, 2, 3, 3],
+   "믿기": [2, 2, 4, 4],
+   "선 지키기": [2, 4, 3, 3],
+   "말하기": [4, 2, 3, 3],
+   "회복하기": [1, 1, 4, 3]
+  },
+  "self_mode_votes": ["다가가기", "다가가기", "맞춰주기", "다가가기"],
+  "partner": {
+   "기대기": [2, 4],
+   "믿기": [4, 3],
+   "선 지키기": [3, 3],
+   "말하기": [2, 1],
+   "회복하기": [3, 2]
+  },
+  "partner_mode_votes": ["거리두기", "거리두기", "조율하기", "거리두기"],
+  "notable": [5, 10, 17, 21, 32],
+  "expect": {
+   "my_type": "문어",
+   "partner_type": "혹등고래",
+   "loop": "다가갈수록 멀어지는 사이",
+   "mismatch": {
+    "competency": "말하기",
+    "key": "me_higher"
+   },
+   "balance": "me",
+   "inner_outer": {
+    "competency": "회복하기",
+    "key": "outer_higher"
+   }
+  }
+ },
+ {
+  "id": "case04",
+  "sample_no": 4,
+  "label": "수달 → 불가사리 (여보, 결혼·동거)",
+  "nickname": "여보",
+  "relationship": "결혼·동거",
+  "self": {
+   "기대기": [3, 1, 2, 1],
+   "믿기": [4, 2, 2, 4],
+   "선 지키기": [3, 3, 3, 3],
+   "말하기": [4, 3, 3, 2],
+   "회복하기": [3, 2, 3, 4]
+  },
+  "self_mode_votes": ["다가가기", "다가가기", "거리두기", "다가가기"],
+  "partner": {
+   "기대기": [4, 3],
+   "믿기": [2, 4],
+   "선 지키기": [3, 3],
+   "말하기": [2, 3],
+   "회복하기": [2, 1]
+  },
+  "partner_mode_votes": ["조율하기", "조율하기", "거리두기", "조율하기"],
+  "notable": [6, 13, 18, 21, 33, 34],
+  "expect": {
+   "my_type": "수달",
+   "partner_type": "불가사리",
+   "loop": "빠른 쪽과 정리하는 쪽의 속도 차이",
+   "mismatch": {
+    "competency": "기대기",
+    "key": "partner_higher"
+   },
+   "balance": "me",
+   "inner_outer": {
+    "key": "default"
+   }
+  }
+ },
+ {
+  "id": "case05",
+  "sample_no": 5,
+  "label": "해달 → 해파리 (하늘, 연애)",
+  "nickname": "하늘",
+  "relationship": "연애",
+  "self": {
+   "기대기": [4, 3, 2, 2],
+   "믿기": [4, 3, 2, 4],
+   "선 지키기": [4, 3, 4, 3],
+   "말하기": [2, 4, 4, 3],
+   "회복하기": [2, 2, 3, 4]
+  },
+  "self_mode_votes": ["맞춰주기", "맞춰주기", "거리두기", "맞춰주기"],
+  "partner": {
+   "기대기": [4, 4],
+   "믿기": [3, 2],
+   "선 지키기": [3, 4],
+   "말하기": [4, 4],
+   "회복하기": [2, 1]
+  },
+  "partner_mode_votes": ["맞춰주기", "맞춰주기", "거리두기", "맞춰주기"],
+  "notable": [1, 6, 21, 33, 34],
+  "expect": {
+   "my_type": "해달",
+   "partner_type": "해파리",
+   "loop": "서로 눈치 보며 얽힌 사이",
+   "mismatch": {
+    "competency": "기대기",
+    "key": "partner_higher"
+   },
+   "balance": "me",
+   "inner_outer": {
+    "competency": "기대기",
+    "key": "inner_higher"
+   }
+  }
+ },
+ {
+  "id": "case06",
+  "sample_no": 6,
+  "label": "돌고래 → 물범 (준호, 결혼·동거)",
+  "nickname": "준호",
+  "relationship": "결혼·동거",
+  "self": {
+   "기대기": [4, 4, 3, 4],
+   "믿기": [2, 4, 3, 3],
+   "선 지키기": [3, 2, 4, 2],
+   "말하기": [2, 2, 2, 1],
+   "회복하기": [4, 4, 4, 3]
+  },
+  "self_mode_votes": ["맞춰주기", "맞춰주기", "조율하기", "맞춰주기"],
+  "partner": {
+   "기대기": [2, 1],
+   "믿기": [4, 2],
+   "선 지키기": [4, 4],
+   "말하기": [4, 3],
+   "회복하기": [4, 4]
+  },
+  "partner_mode_votes": ["거리두기", "거리두기", "조율하기", "거리두기"],
+  "notable": [4, 16, 21, 25, 26],
+  "expect": {
+   "my_type": "돌고래",
+   "partner_type": "물범",
+   "loop": "말하지 않아 서로의 필요를 모르는 사이",
+   "mismatch": {
+    "competency": "기대기",
+    "key": "me_higher"
+   },
+   "balance": "partner",
+   "inner_outer": {
+    "key": "default"
+   }
+  }
+ },
+ {
+  "id": "case07",
+  "sample_no": 7,
+  "label": "펭귄 → 개구리 (도윤, 연애)",
+  "nickname": "도윤",
+  "relationship": "연애",
+  "self": {
+   "기대기": [4, 4, 4, 2],
+   "믿기": [2, 1, 3, 4],
+   "선 지키기": [4, 3, 2, 2],
+   "말하기": [2, 4, 4, 2],
+   "회복하기": [3, 4, 4, 4]
+  },
+  "self_mode_votes": ["맞춰주기", "맞춰주기", "거리두기", "맞춰주기"],
+  "partner": {
+   "기대기": [2, 3],
+   "믿기": [3, 4],
+   "선 지키기": [3, 2],
+   "말하기": [2, 1],
+   "회복하기": [4, 3]
+  },
+  "partner_mode_votes": ["조율하기", "조율하기", "맞춰주기", "조율하기"],
+  "notable": [7, 15, 20, 21, 31, 32],
+  "expect": {
+   "my_type": "펭귄",
+   "partner_type": "개구리",
+   "loop": "조용히 배려하지만 말하지 않은 기대가 쌓이는 사이",
+   "mismatch": {
+    "competency": "말하기",
+    "key": "me_higher"
+   },
+   "balance": "me",
+   "inner_outer": {
+    "competency": "믿기",
+    "key": "outer_higher"
+   }
+  }
+ },
+ {
+  "id": "case08",
+  "sample_no": 8,
+  "label": "가오리 → 바다의 노인 (태오, 연애)",
+  "nickname": "태오",
+  "relationship": "연애",
+  "self": {
+   "기대기": [3, 3, 3, 3],
+   "믿기": [4, 3, 2, 3],
+   "선 지키기": [2, 3, 2, 3],
+   "말하기": [3, 2, 3, 4],
+   "회복하기": [2, 1, 1, 3]
+  },
+  "self_mode_votes": ["거리두기", "거리두기", "다가가기", "거리두기"],
+  "partner": {
+   "기대기": [2, 2],
+   "믿기": [4, 3],
+   "선 지키기": [4, 2],
+   "말하기": [2, 1],
+   "회복하기": [3, 4]
+  },
+  "partner_mode_votes": ["거리두기", "거리두기", "다가가기", "거리두기"],
+  "notable": [5, 10, 17, 21, 31, 32],
+  "expect": {
+   "my_type": "가오리",
+   "partner_type": "바다의 노인",
+   "loop": "조용하지만 멀어진 사이",
+   "mismatch": {
+    "competency": "말하기",
+    "key": "me_higher"
+   },
+   "balance": "balanced",
+   "inner_outer": {
+    "key": "default"
+   }
+  }
+ },
+ {
+  "id": "case09",
+  "sample_no": 9,
+  "label": "거북 → 백조 (유진, 연애)",
+  "nickname": "유진",
+  "relationship": "연애",
+  "self": {
+   "기대기": [2, 3, 3, 4],
+   "믿기": [3, 4, 2, 4],
+   "선 지키기": [2, 3, 2, 3],
+   "말하기": [4, 3, 2, 3],
+   "회복하기": [4, 4, 4, 3]
+  },
+  "self_mode_votes": ["거리두기", "거리두기", "다가가기", "거리두기"],
+  "partner": {
+   "기대기": [3, 3],
+   "믿기": [2, 1],
+   "선 지키기": [2, 3],
+   "말하기": [4, 3],
+   "회복하기": [2, 3]
+  },
+  "partner_mode_votes": ["조율하기", "조율하기", "다가가기", "조율하기"],
+  "notable": [3, 8, 21, 27, 28],
+  "expect": {
+   "my_type": "거북",
+   "partner_type": "백조",
+   "loop": "각자 정리하느라 연결 시간이 부족한 사이",
+   "mismatch": {
+    "competency": "믿기",
+    "key": "me_higher"
+   },
+   "balance": "balanced",
+   "inner_outer": {
+    "key": "default"
+   }
+  }
+ },
+ {
+  "id": "case10",
+  "sample_no": 10,
+  "label": "조개 → 비버 (자기, 결혼·동거)",
+  "nickname": "자기",
+  "relationship": "결혼·동거",
+  "self": {
+   "기대기": [2, 2, 2, 4],
+   "믿기": [3, 2, 2, 3],
+   "선 지키기": [3, 1, 2, 1],
+   "말하기": [4, 4, 4, 4],
+   "회복하기": [2, 2, 3, 3]
+  },
+  "self_mode_votes": ["조율하기", "조율하기", "맞춰주기", "조율하기"],
+  "partner": {
+   "기대기": [2, 1],
+   "믿기": [4, 3],
+   "선 지키기": [3, 2],
+   "말하기": [4, 3],
+   "회복하기": [4, 2]
+  },
+  "partner_mode_votes": ["조율하기", "조율하기", "다가가기", "조율하기"],
+  "notable": [14, 19, 21, 25, 26],
+  "expect": {
+   "my_type": "조개",
+   "partner_type": "비버",
+   "loop": "안정적이지만 느린 사이",
+   "mismatch": {
+    "competency": "기대기",
+    "key": "me_higher"
+   },
+   "balance": "balanced",
+   "inner_outer": {
+    "key": "default"
+   }
+  }
+ }
+]
