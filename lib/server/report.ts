@@ -15,8 +15,6 @@ const TABLE = "rel_sessions";
 const STALE_MS = 6 * 60 * 1000; // 이보다 오래 'generating'이면 중간에 끊긴 것으로 보고 다시 시도할 수 있다
 const ATTEMPT_TIMEOUT_MS = 280_000; // 라우트 maxDuration 300초 안
 const MAX_REVISIONS = 2;
-// 분량(공백 제외) — 검증 범위 3,000~4,500자 안쪽 가운데를 겨냥하게 한다(경계에 걸치면 고친 글이 다시 넘거나 모자람)
-const CHAR_MIN = 3000, CHAR_MAX = 4500, CHAR_AIM = [3500, 4000] as const;
 
 let builder: ReturnType<typeof makeReportBuilder> | null = null;
 const B = () => (builder ??= makeReportBuilder({ DATA: relData(), ...reportDocs() }));
@@ -62,7 +60,7 @@ async function runAttempt(row: Row, attempt: number) {
     // 검증에 걸리면 같은 시도 안에서 한 번 고쳐 쓰게 한다(owner 2026-11-25 — luna가 분량 R2·말투 R7에 자주 걸림).
     // 처음부터 다시 쓰게 하면 같은 곳에서 또 걸리기 쉬워, 방금 쓴 글과 걸린 규칙(자동 검증의 상세)을 함께 돌려준다.
     // 시스템 프롬프트는 그대로이고, 고친 글도 똑같이 검증한다. 남은 시간이 넉넉할 때만.
-    // 고친 글도 걸리면 시간이 남는 한 한 번 더 고친다(최대 2번 — 분량 R2는 한 번에 맞추지 못할 때가 있음, owner 2026-11-27).
+    // 고친 글도 걸리면 시간이 남는 한 한 번 더 고친다(최대 2번, owner 2026-11-27).
     for (let round = 0; round < MAX_REVISIONS && !v.pass; round++) {
       const left = ATTEMPT_TIMEOUT_MS - (Date.now() - started);
       if (left <= 90_000) break;
@@ -99,7 +97,6 @@ const sumUsage = (a: AiUsage, b: AiUsage): AiUsage => ({ model: b.model, input: 
 // 고쳐 쓰기 요청: 걸린 규칙과 자동 검증이 찾은 자리(문장 끝 일부·글자 수)만 알려 준다. 규칙 원문은 시스템 프롬프트에 이미 있다.
 const RULE_HINT: Record<string, string> = {
   R1: "### 4. ~ ### 8. 헤더 5개를 제목 그대로, 이 순서로만 씁니다(1~3번 헤더 금지).",
-  R2: "전체 분량을 공백 제외 3,000~4,500자로 맞춥니다. 모자라면 장면 문단을, 넘치면 겹치는 설명을 줄입니다.",
   R3: "5·6·8번은 '• ' 말머리 줄이 정확히 3개, 7번은 '첫째,' '둘째,' '셋째,'로 시작하는 문단이 있어야 합니다.",
   R4: "8번 마지막 문단은 '이 리포트와 함께 1주일간 AI 채팅 이용권이 제공됩니다'로 시작합니다.",
   R5: "금지어(회피형·불안형·집착·이기적·최악·상극·헤어지·이별하·참아야·**)를 쓰지 않습니다.",
@@ -111,23 +108,10 @@ const RULE_HINT: Record<string, string> = {
   X2: "동물·캐릭터 비유(○○처럼)와 물·바다 은유를 실제 행동으로 바꿉니다.",
   X3: "지난 연애·상대 가족·이혼처럼 응답에 없는 전제를 지웁니다.",
 };
-// R2: 얼마나 넘쳤는지·모자랐는지와 어디를 줄이고 늘릴지를 숫자로 알려 준다
-function lengthHint(chars: number): string {
-  const [lo, hi] = CHAR_AIM;
-  const range = `공백 제외 ${lo.toLocaleString()}~${hi.toLocaleString()}자`;
-  if (chars > CHAR_MAX)
-    return `글이 ${(chars - CHAR_MAX).toLocaleString()}자 넘칩니다. 약 ${(chars - hi).toLocaleString()}~${(chars - lo).toLocaleString()}자를 덜어 ${range}로 맞춥니다. 섹션마다 비슷하게 덜고, 겹치는 설명·같은 뜻을 되풀이하는 문장을 먼저 뺍니다. 헤더·말머리 3개·첫째/둘째/셋째·장면 인용 3개·8번 마지막 안내 문단은 그대로 둡니다.`;
-  if (chars < CHAR_MIN)
-    return `글이 ${(CHAR_MIN - chars).toLocaleString()}자 모자랍니다. 약 ${(lo - chars).toLocaleString()}~${(hi - chars).toLocaleString()}자를 더해 ${range}로 맞춥니다. 4번 본문·5번의 장면 설명과 7번 첫째/둘째/셋째 문단에 응답에서 근거를 찾은 구체적인 문장을 더합니다(새 전제는 만들지 않습니다).`;
-  return RULE_HINT.R2;
-}
 function revisionNote(v: { chars: number; checks: { id: string; name: string; pass: boolean; detail: string }[] }): string {
   const bad = v.checks.filter((c) => !c.pass);
   return [
     "방금 쓴 글이 자동 검증에서 아래 항목에 걸렸습니다. 내용과 구성은 그대로 두고 걸린 부분만 고쳐서, 4번 본문~8번 전체를 같은 형식으로 다시 써 주세요. 설명이나 머리말 없이 글만 씁니다.",
-    `(지금 분량: 공백 제외 ${v.chars}자)`,
-    ...bad.map((c) => `- ${c.id}: ${c.id === "R2" ? lengthHint(v.chars) : RULE_HINT[c.id] ?? c.name} / 검증 결과: ${String(c.detail).slice(0, 300)}`),
-    // 분량이 통과했어도 다른 규칙을 고치다 넘치거나 모자라지 않게 범위를 함께 적는다
-    ...(bad.some((c) => c.id === "R2") ? [] : [`- 고치면서 전체 분량은 공백 제외 ${CHAR_MIN.toLocaleString()}~${CHAR_MAX.toLocaleString()}자 안을 지킵니다(지금 ${v.chars.toLocaleString()}자).`]),
+    ...bad.map((c) => `- ${c.id}: ${RULE_HINT[c.id] ?? c.name} / 검증 결과: ${String(c.detail).slice(0, 300)}`),
   ].join("\n");
 }

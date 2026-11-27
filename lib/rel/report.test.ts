@@ -45,5 +45,5 @@ test("검증기: 비어 있는 글은 실패, 예시 리포트 형식 규칙을 
   const s = { nickname: "민수", relationship: "연애", answers, result: computeResult(answers, DATA) };
   const v = validate("### 4. 우리 관계는 보통 이렇게 흘러갑니다\n짧은 글입니다.", B.buildContext(s));
   assert.equal(v.pass, false);
-  assert.ok(v.checks.find((c) => c.id === "R2" && !c.pass));
+  assert.ok(v.checks.find((c) => c.id === "R2" && c.pass)); // 운영본은 분량으로 걸러 내지 않음(owner 2026-11-27)
 });
