@@ -20,6 +20,8 @@ export type Row = {
   report_status: "none" | "generating" | "ready" | "failed";
   report_body: string | null;
   report_attempts: number;
+  partner_pick_self?: string | null;
+  partner_pick_view?: string | null;
   report_validation: { pass?: boolean; error?: string; failed?: { id: string }[] } | null;
   report_started_at: string | null;
   created_at: string;
@@ -97,6 +99,7 @@ export async function finish(row: Row): Promise<Row> {
 export type ResultPayload = {
   view: ResultView;
   report: { status: Row["report_status"]; sections: Record<number, Block[]> | null; canRetry: boolean; aiOff: boolean; attempts: number; why: string | null };
+  partnerPick: [string, string] | null;
 };
 
 // 한 결과당 AI 시도 상한. 시도 한 번 = 쓰기 + (검증에 걸리면) 고쳐 쓰기. 자동으로 2번, 그 뒤엔 사용자가 [다시 만들기]로.
@@ -119,6 +122,7 @@ export function resultPayload(row: Row): ResultPayload {
       attempts: row.report_attempts,
       why: reportWhy(row.report_validation),
     },
+    partnerPick: row.partner_pick_self && row.partner_pick_view ? [row.partner_pick_self, row.partner_pick_view] : null,
   };
 }
 
@@ -127,6 +131,21 @@ function reportWhy(v: Row["report_validation"]): string | null {
   if (v.error) return `AI 호출 오류: ${v.error.slice(0, 120)}`;
   if (v.failed?.length) return `자동 검증에서 걸린 규칙: ${v.failed.map((f) => f.id).join(", ")}`;
   return null;
+}
+
+/** 10쪽에서 고른 상대 결과 두 유형 저장(유형 이름만, owner 2026-11-27). 둘 다 비우면 지운다. */
+export async function savePartnerPick(row: Row, input: Record<string, unknown>): Promise<void> {
+  if (row.status !== "completed") throw new RelError("아직 끝나지 않은 테스트입니다.", 409);
+  const names = new Set((relData().types as { name: string }[]).map((t) => t.name));
+  const self = typeof input.self === "string" ? input.self : "", view = typeof input.view === "string" ? input.view : "";
+  const clear = !self && !view;
+  if (!clear && (!names.has(self) || !names.has(view))) throw new RelError("유형을 다시 골라 주세요.");
+  const { error } = await db()
+    .from(TABLE)
+    .update({ partner_pick_self: clear ? null : self, partner_pick_view: clear ? null : view, partner_pick_at: clear ? null : new Date().toISOString() })
+    .eq("id", row.id);
+  // 칸이 아직 없으면(마이그레이션 전) 저장만 건너뛴다 — 화면은 이 기기에 남긴 값으로 계속 비교한다
+  if (error) throw new RelError("고른 유형을 저장하지 못했습니다(이 기기에는 남아 있습니다).", 503);
 }
 
 export async function listMine(userId: string) {

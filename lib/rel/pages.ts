@@ -191,7 +191,8 @@ export function buildResultView(D: Dict, M: Manifest, inp: BuildInput): ResultVi
         title: pageTitle(10),
         intro: R("{애칭}도 테스트를 했다면, 두 사람이 서로를 어떻게 보고 있는지 맞춰 볼 수 있습니다. {애칭|이} 아직 안 했다면 링크를 보내 보세요. 비교하지 않아도 12쪽 '{애칭|과} 함께 해 볼 일'은 그대로 볼 수 있습니다.", vars),
         sub: R(box.sub, vars), selSelf: R(box.select_partner_self, vars), selView: R(box.select_partner_view_me, vars), placeholder: box.placeholder,
-        button: box.button, invite: R(box.invite, vars), inviteNote: R(box.invite_note, vars),
+        button: box.button, invite: R(box.invite, vars), // 데이터 box.invite_note("저장되지 않고…")는 owner 2026-11-27 저장 결정과 맞지 않아 이 문장으로 바꿔 보인다
+        inviteNote: R("고른 두 유형만 내 결과에 함께 저장되고, {애칭}의 점수나 답은 저장되지 않습니다.", vars),
       },
       p11: {
         title: pageTitle(11), locked: R(str(pc.locked), vars), lockButton: R("{애칭} 결과 넣으러 가기", vars),

@@ -91,17 +91,24 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
   const [flipped, setFlipped] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const kicked = useRef(0);
-  // 10쪽에서 고른 상대 유형 두 개. 서버로 보내지 않고 이 기기 브라우저에만 둔다(partner_compare: 상대 결과는 저장하지 않음).
+  // 10쪽에서 고른 상대 유형 두 개(유형 이름만). owner 2026-11-27 결정으로 결과에 저장한다 — 다른 기기에서도 비교가 이어지게.
+  // 저장된 값이 있으면 그것을, 없으면 이 기기에 남긴 값을 쓴다. 서버 저장이 안 되면(마이그레이션 전 등) 이 기기 값으로 계속 비교.
   const [pick, setPick] = useState<[string, string]>(["", ""]);
+  const serverPick = data?.partnerPick ?? null;
   useEffect(() => {
+    if (serverPick) { queueMicrotask(() => setPick(serverPick)); return; }
     try {
       const v = JSON.parse(localStorage.getItem(`rel-pc-${id}`) ?? "null");
       if (Array.isArray(v) && v.length === 2) queueMicrotask(() => setPick([String(v[0] ?? ""), String(v[1] ?? "")]));
     } catch { /* 저장소를 못 쓰면 매번 고른다 */ }
-  }, [id]);
+  }, [id, serverPick]);
   const choose = (v: [string, string]) => {
     setPick(v);
     try { localStorage.setItem(`rel-pc-${id}`, JSON.stringify(v)); } catch { /* 무시 */ }
+    if (initial || !v[0] || !v[1]) return;
+    const c = cache.get(id);
+    if (c) cache.set(id, { ...c, partnerPick: v });
+    void api(`/api/rel/result/${id}/partner`, { method: "POST", body: { self: v[0], view: v[1] } }).catch(() => {});
   };
 
   const load = useCallback(async () => {
