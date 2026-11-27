@@ -22,7 +22,7 @@ export type Row = {
   report_attempts: number;
   partner_pick_self?: string | null;
   partner_pick_view?: string | null;
-  report_validation: { pass?: boolean; error?: string; failed?: { id: string }[] } | null;
+  report_validation: { pass?: boolean; error?: string; chars?: number; failed?: { id: string }[] } | null;
   report_started_at: string | null;
   created_at: string;
   completed_at: string | null;
@@ -129,7 +129,8 @@ export function resultPayload(row: Row): ResultPayload {
 function reportWhy(v: Row["report_validation"]): string | null {
   if (!v || v.pass) return null;
   if (v.error) return `AI 호출 오류: ${v.error.slice(0, 120)}`;
-  if (v.failed?.length) return `자동 검증에서 걸린 규칙: ${v.failed.map((f) => f.id).join(", ")}`;
+  if (v.failed?.length)
+    return `자동 검증에서 걸린 규칙: ${v.failed.map((f) => (f.id === "R2" && v.chars ? `R2(${v.chars.toLocaleString()}자 — 3,000~4,500자여야 함)` : f.id)).join(", ")}`;
   return null;
 }
 
