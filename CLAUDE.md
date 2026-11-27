@@ -25,7 +25,7 @@ owner는 개발자가 아니다. 큰 변경마다 (1) 무엇을·왜 바꾸는�
 ## 3. 구조
 - 별도 저장소(`relationship`)·별도 주소. 쏘웰라(`Ssol-Wellness-House`)·디저트·타로와 **같은 Supabase 프로젝트·같은 계정**. 세션 쿠키는 `.ssolwellnesshouse.com`(`lib/supabase/shared-cookie-domain.ts`, 쏘웰라·타로와 같은 로직).
 - **클로즈드 세션 배포본(owner 2026-11-25)**: 로그인해야 모든 화면에 들어간다(`components/AuthGate.tsx` + API마다 `requireUser`). **토스 결제 없이 전체 열람** — 결과가 나오면 바로 AI 리포트를 만든다. 결제를 붙일 때: 4~10쪽 유료 본문을 결제 전 서버에서 빼고(`lib/rel/pages.ts` 주석), 5~9쪽은 `blur_samples`, 리포트 생성은 결제 확인 뒤로(`app/api/rel/session/[id]/finish/route.ts`).
-- 장면마다 자기 주소: `/test/{세션}/{step}`(step 목록 `lib/rel/flow.ts` STEP_RE), 결과 `/result/{세션}/{1~10}`.
+- 장면마다 자기 주소: `/test/{세션}/{step}`(step 목록 `lib/rel/flow.ts` STEP_RE), 결과 `/result/{세션}/{1~12}`.
 - 순수 로직(서버·테스트 공용): `lib/rel/flow.ts`(장면 순서·확인 화면), `steps.ts`(장면 문구 렌더 — 점수는 브라우저로 보내지 않고 보기 위치로만), `result.ts`(채점 = 패키지 `scoring.js` 호출만), `pages.ts`(결과 10쪽 조립), `images.ts`(그림 규칙), `reportInput.js`(AI 입력 = 패키지 `report_pretest/build_input.mjs`와 같은 규칙), `reportValidate.js`(자동 검증 = 패키지 `validate.mjs`, 유형 이름만 ctx로).
 - `lib/rel/scoring.js`·`josa.js`·`test_scoring.mjs`·`report_pretest/`는 owner 패키지 원본 — **로직을 고치지 않는다**(경로만 이 저장소에 맞춤). 패키지 새 버전이 오면 `data/`·`docs/`·`db/`·이 파일들을 통째로 바꾸고 `npm test`.
 - 서버는 `lib/server/*`(`server-only`). 데이터·문서는 실행 중에 파일로 읽는다(`lib/server/data.ts`, 배포본 포함은 `next.config.ts` outputFileTracingIncludes).
@@ -54,3 +54,8 @@ owner는 개발자가 아니다. 큰 변경마다 (1) 무엇을·왜 바꾸는�
   - 공유: 휴대폰 공유창(없으면 링크 복사). 카카오톡 SDK·공유 그림 만들기는 아직 없음.
   - 그림: 관계 그림 300장(done) + 21유형 소개컷 3장씩을 720px JPEG로(`scripts/build_images.py`). 생성 전 141쌍은 4쪽에서 반대 방향 → 두 유형 소개컷 나란히.
 - **2026-11-25 — 리포트 모델 gpt-5.6-luna + 검증 실패 시 '고쳐 쓰기'(owner).** luna가 R2(분량)·R7(말투)에 걸려 리포트가 안 나왔다. 시도 안에서 검증에 걸리면 방금 쓴 글 + 걸린 규칙·상세(`lib/server/report.ts` revisionNote)를 돌려주고 한 번 고쳐 쓰게 한다(시스템 프롬프트는 그대로, 고친 글도 같은 검증). 결과 5~9쪽에는 실패 이유(키 없음·AI 오류·걸린 규칙 번호)를 작게 보인다(클로즈드 세션 점검용 — 공개 전 숨길지 결정).
+- **2026-11-27 — 패키지 v2.6.1(데이터 1.6.1) 반영: 결과 12쪽.** 바뀐 것은 데이터(`result_flow.pages`·`partner_compare`, `couple_plans.merge_rule`)·문서·시안·`test_scoring.mjs`뿐(채점·AI 프롬프트·검증·예시 리포트는 v2.5와 같음).
+  - 9쪽: 혼자 카드 3장만. 10쪽 「{애칭}의 결과는 어떻게 나왔나요?」: 상대 결과 화면의 두 유형을 드롭다운으로 고름 + 카카오톡으로 테스트 보내기. 11쪽 「우리 생각의 차이는 뭘까?」·12쪽 맨 위 '서로 해볼 말'은 고른 뒤에만 열림(그 전엔 잠금 안내). 12쪽: 합친 작심삼일 → 더해 볼 것 → 쏘웰라 → 공유·고지문.
+  - **상대 결과는 서버로 보내지 않는다**: 고른 유형 두 개는 그 기기 브라우저에만(`localStorage rel-pc-{결과}`), 비교는 브라우저에서 `lib/rel/compare.ts`(시안 비교 스크립트와 같은 판정 — same/mode_same/comp_same/both_diff + projection, 고리 비교, 더해 볼 가족). 서버는 무료 문구 재료(`pages.compare`)만 보낸다.
+  - 작심삼일 합치기: 가족 2일차 how에 ①·③ 칸이 있으면(지금은 CPL-RETURN만) ①에 loop_practices[0]의 따옴표 예시, ③에 loop_practices[1] 제목을 '— 예:'로 끼우고, 칸이 없으면 같은 두 줄을 2일차 아래 예시로. role·why·출처 줄은 merge_rule대로. 시안의 ③ 예시 문장은 사람이 다듬은 것이라 데이터만으로는 같지 않음.
+  - 9쪽 안내·10쪽 안내 문단, 11쪽 "누가 맞고 틀린 것이 아닙니다" 문장, 12쪽 소제목은 시안 문장을 {애칭}만 바꿔 코드에 둠(데이터에 없음).

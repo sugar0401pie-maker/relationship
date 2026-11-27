@@ -164,6 +164,8 @@ p { margin: 0; }
 .plan .t { font-weight: 700; color: var(--navy); font-size: 14px; line-height: 1.55; }
 .plan .h { font-size: 13.5px; }
 .plan .tired { font-size: 12.5px; color: var(--muted); }
+.plan .role { font-size: 13px; background: var(--cream); border-radius: 10px; padding: 8px 10px; margin: 0; }
+.plan .src { font-size: 11px; color: var(--muted); }
 /* 10쪽 쏘웰라 */
 .chat { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; }
 .bubble { background: var(--sky-soft); border-radius: 14px 14px 14px 4px; padding: 10px 12px; font-size: 14px; max-width: 92%; }
@@ -173,6 +175,33 @@ p { margin: 0; }
 .pass { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; background: var(--cream); border: 1px dashed var(--navy); border-radius: 12px; padding: 10px 12px; }
 .disclaimer { font-size: 11.5px; color: var(--muted); line-height: 1.65; border-top: 1px solid var(--line); padding-top: 12px; }
 
+
+/* 10쪽 상대 결과 상자 · 11·12쪽 */
+.pbox { background: var(--sky-soft); border: 1.5px solid var(--navy); border-radius: 16px; padding: 14px; display: grid; gap: 10px; }
+.pbox h2 { font-size: 16px; }
+.pbox .sel { display: grid; grid-template-columns: auto 1fr; gap: 8px 10px; align-items: center; }
+.pbox label { font-size: 14px; font-weight: 700; color: var(--navy); white-space: nowrap; }
+.pbox select { width: 100%; min-width: 0; font: inherit; font-size: 14px; padding: 10px 8px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--white); color: var(--ink); }
+.pbox .go { border: 0; background: var(--navy); color: var(--cream); border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 700; min-height: 48px; }
+.pbox .go:disabled { opacity: .4; cursor: default; }
+.pbox .inv { border: 0; background: var(--kakao); color: #191600; border-radius: 12px; padding: 10px; font-size: 13px; font-weight: 700; min-height: 44px; }
+.lockbox { background: var(--white); border: 1.5px dashed var(--sky-strong); border-radius: 16px; padding: 22px 16px; text-align: center; display: grid; gap: 10px; justify-items: center; }
+.lockbox p { font-size: 14px; color: var(--navy); font-weight: 500; }
+.lockbox button { border: 1.5px solid var(--navy); background: var(--white); color: var(--navy); border-radius: 12px; padding: 10px 16px; font-size: 14px; font-weight: 700; }
+.four { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.four .mini { padding: 8px 6px 10px; }
+.four .mini span:first-child { font-size: 11px; color: var(--muted); }
+.four .mini img { width: 70px; height: 60px; object-fit: contain; }
+.four .mini.other { border-style: dashed; }
+.gap { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 8px; }
+.gap .k { font-size: 12px; color: var(--muted); }
+.gap .vs { display: grid; gap: 6px; }
+.gap .vs p { font-size: 14px; background: var(--cream); border-radius: 10px; padding: 8px 10px; }
+.gap .vs b { color: var(--navy); font-size: 12px; display: block; }
+.gap .proj { font-size: 13.5px; border-left: 3px solid var(--sky-strong); padding-left: 10px; }
+.loopcmp { background: var(--navy); color: var(--cream); border-radius: 14px; padding: 14px; font-size: 14px; }
+.act { background: var(--white); border: 1.5px solid var(--navy); border-radius: 14px; padding: 14px; display: grid; gap: 6px; }
+.act .k { font-size: 12px; color: var(--muted); }
 /* 아래 넘김 */
 .nav { position: sticky; bottom: 0; background: var(--cream); border-top: 1px solid #01356614; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); display: grid; grid-template-columns: auto 1fr; gap: 8px; }
 .nav button { border-radius: 12px; min-height: 48px; font-size: 14px; font-weight: 700; }
@@ -197,7 +226,7 @@ p { margin: 0; }
 
   <!-- 1 -->
   <section class="page" data-title="당신은 이런 사람입니다">
-    <div class="pno">1 / 10</div>
+    <div class="pno">1 / 12</div>
     <p class="lead"><b>지민님의 결과를 알려드리겠습니다.</b> 첫 번째 장은 나, 두 번째 장은 내 눈에 비친 서준, 세 번째 장은 두 사람이 만나는 곳을 보여 줍니다. 먼저 지민님이 어떤 사람인지 보겠습니다.</p>
     <h1>당신은 이런 사람입니다</h1>
     <div class="tcard">
@@ -220,7 +249,7 @@ p { margin: 0; }
 
   <!-- 2 -->
   <section class="page" data-title="당신이 보는 서준은 이럴 거예요" hidden>
-    <div class="pno">2 / 10</div>
+    <div class="pno">2 / 12</div>
     <h1>당신이 보는 서준은 이럴 거예요</h1>
     <div class="tcard">
       <span class="tag">두 번째 장 · 내 눈에 비친 서준</span>
@@ -244,7 +273,7 @@ p { margin: 0; }
 
   <!-- 3 -->
   <section class="page" data-title="지민님과 서준의 사이 풀어보기" hidden>
-    <div class="pno">3 / 10</div>
+    <div class="pno">3 / 12</div>
     <h1>지민님과 서준의 사이 풀어보기</h1>
     <div class="three">
       <div class="mini"><img data-img="o" alt=""><b>문어</b><span>나</span></div>
@@ -270,7 +299,7 @@ p { margin: 0; }
 
   <!-- 4 -->
   <section class="page" data-title="우리가 만나는 곳" hidden>
-    <div class="pno">4 / 10 · 세 번째 장</div>
+    <div class="pno">4 / 12 · 세 번째 장</div>
     <h1>우리가 만나는 곳</h1>
     <article class="scene flip" id="scene">
       <img class="art-img" src="assets/meet.jpg" alt="수중 작은 극장에서 문어가 커튼을 열고, 위로 혹등고래가 헤엄치는 그림" width="760" height="760">
@@ -299,7 +328,7 @@ p { margin: 0; }
 
   <!-- 5 -->
   <section class="page" data-title="우리 관계는 보통 이렇게 흘러갑니다" hidden>
-    <div class="pno">5 / 10</div>
+    <div class="pno">5 / 12</div>
     <h1>우리 관계는 보통 이렇게 흘러갑니다</h1>
     <figure class="illus"><img data-rand alt="쏠 마을 그림" width="560" height="700"></figure>
     <div class="prose">
@@ -313,7 +342,7 @@ p { margin: 0; }
 
   <!-- 6 -->
   <section class="page" data-title="당신이 주로 서운함을 느끼는 순간은..." hidden>
-    <div class="pno">6 / 10</div>
+    <div class="pno">6 / 12</div>
     <h1>당신이 주로 서운함을 느끼는 순간은...</h1>
     <figure class="illus"><img data-rand alt="쏠 마을 그림" width="560" height="700"></figure>
     <p>당신의 서운함은 대개 내민 손이 허공에 머무는 시간에서 시작됩니다. 회복하기 점수가 2.25점으로 다섯 역량 중 가장 낮은 자리에 있다는 것도, 다툼 뒤 다시 이어 붙이는 일에 요즘 마음이 가장 많이 쓰인다는 뜻입니다.</p>
@@ -334,7 +363,7 @@ p { margin: 0; }
 
   <!-- 7 -->
   <section class="page" data-title="서준은 주로 이럴 때 서운함을 느껴요" hidden>
-    <div class="pno">7 / 10</div>
+    <div class="pno">7 / 12</div>
     <h1>서준은 주로 이럴 때 서운함을 느껴요</h1>
     <figure class="illus"><img data-rand alt="쏠 마을 그림" width="560" height="700"></figure>
     <p>내 눈에 비친 서준은 서운한 일이 있어도 말로 꺼내지 않고 혼자 넘기고 있을 가능성이 큽니다. 서준의 말하기를 1.50점으로 보셨다는 것은, 당신 눈에 서준이 서운하다는 말을 직접 꺼내는 일을 가장 버거워하는 사람으로 보인다는 뜻입니다.</p>
@@ -355,7 +384,7 @@ p { margin: 0; }
 
   <!-- 8 -->
   <section class="page" data-title="우리, 더 싸우지 말자! 할 수 있는 방향을 알려드려요" hidden>
-    <div class="pno">8 / 10</div>
+    <div class="pno">8 / 12</div>
     <h1>우리, 더 싸우지 말자! 할 수 있는 방향을 알려드려요</h1>
     <figure class="illus"><img data-rand alt="쏠 마을 그림" width="560" height="700"></figure>
     <p class="lead">이 흐름을 바꾸는 열쇠는 누가 더 애쓰느냐가 아니라, <b>물러나는 시간에 끝이 보이게 만드는 데</b> 있습니다. 기다림에 돌아올 시점이 생기면 당신은 덜 쫓게 되고, 서준은 덜 숨게 될 수 있습니다.</p>
@@ -367,10 +396,10 @@ p { margin: 0; }
 
   <!-- 9 -->
   <section class="page" data-title="이번 주 실천 카드" hidden>
-    <div class="pno">9 / 10</div>
+    <div class="pno">9 / 12</div>
     <h1>이번 주 실천 카드</h1>
     <figure class="illus"><img data-rand alt="쏠 마을 그림" width="560" height="700"></figure>
-    <p>거창한 대화보다 기다림과 돌아옴을 연습하는 작은 움직임부터 시작해요. 혼자 해 볼 카드 세 장, 서준과 함께 해 볼 카드 두 장, 그리고 둘이 함께하는 작심삼일 계획입니다.</p>
+    <p>거창한 대화보다 기다림과 돌아옴을 연습하는 작은 움직임부터 시작해요. 혼자 해 볼 카드 세 장입니다. 서준과 함께 해 볼 것은 마지막 12쪽에 모았습니다.</p>
 
     <article class="pc"><header><b>오늘</b><span>2분 · 글</span></header><div class="body">
       <p class="ttl">오늘 마음이 붙잡기·물러서기 중 어디로 기울었는지 표시하기</p>
@@ -399,41 +428,61 @@ p { margin: 0; }
       <p class="src">쏘웰라 실천 DB · COUPLE-CARE-L2-03</p>
     </div></article>
 
-    <h2 style="margin-top:6px">서준과 함께</h2>
-    <article class="pc together"><header><b>함께 1</b><span>10분 · 말</span></header><div class="body">
-      <p class="ttl">피하고 싶을 때 ‘돌아올 약속’ 한 문장 말하고 돌아오기</p>
-      <p class="row">부딪힌 뒤 쉬고 싶어질 때 쓸 문장을 둘이 함께 정해 두세요. "네가 싫어서가 아니라 머리가 복잡해서 그래. 한 시간 쉬고 9시에 다시 얘기하자"처럼 이유와 돌아올 시간을 담습니다.</p>
-      <p class="role">서준은 물러나기 전에 이 문장을 말하고, 정한 시간에 먼저 돌아옵니다. 지민은 "알겠어, 9시에 얘기하자" 한 번만 답하고 기다립니다.</p>
-      <p class="why">청할수록 물러나고 물러날수록 청하게 되는 흐름이라, 돌아올 시간이 정해지면 두 사람 모두 덜 애쓰게 됩니다.</p>
-      <p class="src">쏘웰라 실천 DB · THX-EFT-08</p>
-    </div></article>
-    <article class="pc together"><header><b>함께 2</b><span>10분 · 행동</span></header><div class="body">
-      <p class="ttl">답장을 기다리며 불안할 때 확인 대신 10분 다른 연결 하기</p>
-      <p class="row">휴대폰을 자꾸 열게 되면 10분만 멈추고, 친구에게 안부를 보내거나 좋아하는 음악을 듣습니다. 10분 뒤 마음이 어땠는지 한 줄 적어 둡니다.</p>
-      <p class="role">지민은 약속한 시간까지 이 방법으로 자기 마음을 돌봅니다. 서준은 쉬는 동안 돌아와서 할 첫마디 하나를 준비합니다.</p>
-      <p class="why">기다리는 쪽이 자기 마음을 돌볼 방법을 갖고 있으면, 쉬는 쪽도 마음 놓고 가라앉힐 수 있습니다.</p>
-      <p class="src">쏘웰라 실천 DB · THX-EFT-24</p>
-    </div></article>
-    <h2 style="margin-top:6px">서준과 함께하는 작심삼일</h2>
-    <div class="plan">
-      <p class="small" style="margin:0">하루에 하나씩, 둘이 함께 해 보는 계획입니다. 쏘웰라가 2일차와 3일차에 먼저 말을 걸어 드립니다.</p>
-      <ol>
-        <li><span class="day">1일차<br>나</span><div><p class="t">오늘 마음이 붙잡기·물러서기 중 어디로 기울었는지 표시하기</p><p class="h">위 '오늘' 카드를 혼자 해 봅니다.</p></div></li>
-        <li><span class="day both">2일차<br>둘이</span><div><p class="t">쉬어 가기 약속 네 줄 함께 쓰기</p><p class="h">서준과 함께 네 줄을 채워 보세요. ① 쉬자고 할 때 하는 말 ② 다시 이야기할 시간 ③ 기다리는 쪽이 할 일 ④ 돌아와서 할 첫마디. 다 쓰면 사진으로 찍어 둘 다 저장합니다.</p><p class="tired">지친 날이면 대신: &#x27;잠깐 쉬자&#x27; 신호 한 단어 정하기 — 서준과 메시지로 서로 하나씩 제안해, 다툼이 커질 때 쓸 &#x27;잠깐 쉬자&#x27; 신호 한 단어를 정해 보세요. 이 말이 나오면 30분 쉬었다가 다시 이야기하기로만 정하면 충분합니다.</p></div></li>
-        <li><span class="day">3일차<br>돌아보기</span><div><p class="t">어제 서준과 해 본 「쉬어 가기 약속 네 줄 함께 쓰기」 돌아보기</p><p class="h">서준과 다툰 뒤 다시 편해지기까지 오래 걸렸던 때, 무엇이 그 시간을 길게 만들었나요?</p></div></li>
-        <li><span class="day both">1주일<br>둘이</span><div><p class="t">이번 주 작은 의견 차이에 약속 한 번 써 보기</p><p class="h">이번 주에 메뉴나 일정처럼 작은 일로 의견이 갈리면, 네 줄 약속대로 쉬었다가 정한 시간에 다시 이야기해 보세요. 끝나고 &#x27;해 보니 어땠는지&#x27; 서로 한 줄씩 보냅니다.</p></div></li>
-        <li><span class="day both">1달<br>둘이</span><div><p class="t">한 달 뒤 약속 다듬는 데이트</p><p class="h">한 달 동안 쉬어 가기를 몇 번 했는지, 정한 시간에 돌아왔는지 함께 돌아보세요. 시간이 너무 길거나 짧았다면 둘에게 맞게 고쳐 다시 저장합니다.</p></div></li>
-      </ol>
-      <p class="tired" style="margin:0">서준이 함께하기 어려워하면, 다툰 뒤 내가 쓸 첫 문장과 기다리는 동안 할 일 하나를 메모장에 적어 둡니다.</p>
-      <p class="src" style="margin:0">연인과 함께 하는 작심삼일 · CPL-RETURN (초안)</p>
-    </div>
   </section>
 
   <!-- 10 -->
-  <section class="page" data-title="쏘웰라와 이어서 이야기하기" hidden>
-    <div class="pno">10 / 10</div>
-    <h1>쏘웰라와 이어서 이야기하기</h1>
+  <section class="page" data-title="서준의 결과는 어떻게 나왔나요?" hidden>
+    <div class="pno">10 / 12 · 함께 보기</div>
+    <h1>서준의 결과는 어떻게 나왔나요?</h1>
     <figure class="illus"><img data-rand alt="쏠 마을 그림" width="560" height="700"></figure>
+    <p>서준도 테스트를 했다면, 두 사람이 서로를 어떻게 보고 있는지 맞춰 볼 수 있습니다. 서준이 아직 안 했다면 링크를 보내 보세요. 비교하지 않아도 12쪽 '서준과 함께 해 볼 일'은 그대로 볼 수 있습니다.</p>
+    <div class="pbox" id="pbox">
+      <p class="small" style="margin:0">서준의 결과 화면 1쪽(자기 유형)과 2쪽(내 눈에 비친 상대)에 나온 유형을 골라 주세요.</p>
+      <div class="sel">
+        <label for="selSelf">서준(나)</label><select id="selSelf"></select>
+        <label for="selView">지민(상대)</label><select id="selView"></select>
+      </div>
+      <button class="go" id="goGap" disabled>우리 생각의 차이는 뭘까?</button>
+      <button class="inv" data-toast="시안에서는 공유되지 않습니다">서준이 아직 안 했다면 테스트 보내기</button>
+      <p class="small" style="margin:0">서준의 결과는 저장되지 않고, 고른 유형으로 이 화면에서만 비교합니다.</p>
+    </div>
+
+  </section>
+
+
+  <!-- 11 -->
+  <section class="page" data-title="우리 생각의 차이는 뭘까?" hidden>
+    <div class="pno">11 / 12 · 함께 보기</div>
+    <h1>우리 생각의 차이는 뭘까?</h1>
+    <figure class="illus"><img data-rand alt="쏠 마을 그림" width="560" height="700"></figure>
+    <div class="lockbox" data-lock><p>서준의 테스트 결과까지 넣어 주시면 볼 수 있습니다.</p><button data-go="10">서준 결과 넣으러 가기</button></div>
+    <div id="gapOut" hidden></div>
+  </section>
+
+  <!-- 12 -->
+  <section class="page" data-title="서준과 함께 해 볼 일" hidden>
+    <div class="pno">12 / 12 · 함께 보기</div>
+    <h1>서준과 함께 해 볼 일</h1>
+    <figure class="illus"><img data-rand alt="쏠 마을 그림" width="560" height="700"></figure>
+    <h2>생각의 차이를 좁히는 서로 해볼 말</h2>
+    <div class="lockbox" data-lock><p>서준의 테스트 결과까지 넣어 주시면 볼 수 있습니다.</p><button data-go="10">서준 결과 넣으러 가기</button></div>
+    <div id="actOut" hidden></div>
+    <h2 style="margin-top:6px">둘이 함께하는 작심삼일</h2>
+    <div class="plan">
+      <p class="small" style="margin:0">하루에 하나씩, 둘이 함께 해 보는 계획입니다. 쏘웰라가 2일차와 3일차에 먼저 말을 걸어 드립니다.</p>
+      <ol>
+        <li><span class="day">1일차<br>나</span><div><p class="t">오늘 마음이 붙잡기·물러서기 중 어디로 기울었는지 표시하기</p><p class="h">9쪽 '오늘' 카드를 혼자 해 봅니다.</p></div></li>
+        <li><span class="day both">2일차<br>둘이</span><div><p class="t">쉬어 가기 약속 네 줄 함께 쓰기</p><p class="h">서준과 함께 네 줄을 채워 보세요. ① 쉬자고 할 때 하는 말 — 예: "네가 싫어서가 아니라 머리가 복잡해서 그래. 한 시간 쉬고 9시에 다시 얘기하자" ② 다시 이야기할 시간 ③ 기다리는 쪽이 할 일 — 예: 휴대폰을 내려놓고 10분 동안 친구에게 안부 보내기나 좋아하는 음악 듣기 ④ 돌아와서 할 첫마디. 다 쓰면 사진으로 찍어 둘 다 저장합니다.</p><p class="role">서준은 물러나기 전에 ①을 말하고, 정한 시간에 먼저 돌아옵니다. 지민은 "알겠어, 9시에 얘기하자" 한 번만 답하고 그동안 ③을 합니다.</p><p class="tired">지친 날이면 대신: '잠깐 쉬자' 신호 한 단어 정하기 — 서준과 메시지로 서로 하나씩 제안해, 다툼이 커질 때 쓸 신호 한 단어를 정해 보세요. 이 말이 나오면 30분 쉬었다가 다시 이야기하기로만 정하면 충분합니다.</p></div></li>
+        <li><span class="day">3일차<br>돌아보기</span><div><p class="t">어제 서준과 해 본 「쉬어 가기 약속 네 줄 함께 쓰기」 돌아보기</p><p class="h">서준과 다툰 뒤 다시 편해지기까지 오래 걸렸던 때, 무엇이 그 시간을 길게 만들었나요?</p></div></li>
+        <li><span class="day both">1주일<br>둘이</span><div><p class="t">이번 주 작은 의견 차이에 약속 한 번 써 보기</p><p class="h">이번 주에 메뉴나 일정처럼 작은 일로 의견이 갈리면, 네 줄 약속대로 쉬었다가 정한 시간에 다시 이야기해 보세요. 끝나고 '해 보니 어땠는지' 서로 한 줄씩 보냅니다.</p></div></li>
+        <li><span class="day both">1달<br>둘이</span><div><p class="t">한 달 뒤 약속 다듬는 데이트</p><p class="h">한 달 동안 쉬어 가기를 몇 번 했는지, 정한 시간에 돌아왔는지 함께 돌아보세요. 시간이 너무 길거나 짧았다면 둘에게 맞게 고쳐 다시 저장합니다.</p></div></li>
+      </ol>
+      <p class="why" style="margin:0">청할수록 물러나고 물러날수록 청하게 되는 흐름이라, 돌아올 시간이 정해지고 기다리는 쪽이 할 일이 있으면 두 사람 모두 덜 애쓰게 됩니다.</p>
+      <p class="tired" style="margin:0">서준이 함께하기 어려워하면, 다툰 뒤 내가 쓸 첫 문장과 기다리는 동안 할 일 하나를 메모장에 적어 둡니다.</p>
+      <p class="src" style="margin:0">연인과 함께 하는 작심삼일 CPL-RETURN + 쏘웰라 실천 DB THX-EFT-08 · THX-EFT-24를 합침</p>
+    </div>
+    <div id="extraOut" hidden></div>
+    <h2 style="margin-top:6px">쏘웰라와 이어서 이야기하기</h2>
     <div class="pass"><span><b style="color:var(--navy)">1주일 AI 채팅 이용권</b></span><span>12월 1일(화)까지</span></div>
     <div class="chat">
       <p class="bubble">오늘은 서준과 함께 「쉬어 가기 약속 네 줄 함께 쓰기」 해 보는 날입니다. 해 보면 사진이나 한 줄로 남겨 주세요. 오늘 힘든 날이면 「&#x27;잠깐 쉬자&#x27; 신호 한 단어 정하기」만 해도 충분합니다.</p>
@@ -453,7 +502,6 @@ p { margin: 0; }
     </div>
     <p class="disclaimer">이 리포트는 전문 심리상담사가 만든 자기이해 도구의 결과로, 의료적 진단이나 심리 치료를 대신하지 않습니다. ‘내 눈에 비친 서준’은 지민님의 응답으로 본 모습이며 서준의 실제 마음과 다를 수 있습니다. 관계 안에서 위협이나 폭력을 겪고 있다면 여성긴급전화 1366(24시간), 긴급 상황에는 112로 연락해 주세요.</p>
   </section>
-
   </main>
 
   <div class="nav">
@@ -480,7 +528,8 @@ document.querySelectorAll('img[data-rand]').forEach(function(e,n){e.src=P[n];e.o
     b.addEventListener('click', function () { go(i); });
     dots.appendChild(b);
   });
-  var labels = ['다음', '다음', '우리가 만나는 곳 보기', '다음', '다음', '다음', '다음', '실천 카드 보기', '쏘웰라로 이어가기', '처음으로'];
+  var labels = ['다음', '다음', '우리가 만나는 곳 보기', '다음', '다음', '다음', '다음', '실천 카드 보기', '서준 결과 넣기', '우리 생각의 차이 보기', '서준과 함께 해 볼 일', '처음으로'];
+  window.__go = function (i) { go(i); };
   function go(i, fromHash) {
     if (i < 0 || i >= pages.length) return;
     pages[cur].hidden = true;
@@ -536,6 +585,70 @@ document.querySelectorAll('img[data-rand]').forEach(function(e,n){e.src=P[n];e.o
   you.forEach(function (v, i) { var p = pt(i, v); el('circle', { cx: p[0], cy: p[1], r: 3.5, fill: '#7FA3C4' }); });
 
   go(fromHash(), true);
+})();
+</script>
+<script>
+(function () {
+  var D = {"types": [{"n": "수달", "c": "기대기", "m": "다가가기", "desc": "먼저 연락하고 챙기지만, 내 약한 마음은 보여주지 않습니다", "cause": "힘든 마음을 꺼내면 {애칭}에게 짐이 될 것 같아서, 챙겨 주는 쪽에 서고 내 얘기는 뒤로 미루게 됩니다.", "root": "ROOT-76", "img": "assets/types/t01.png"}, {"n": "해달", "c": "기대기", "m": "맞춰주기", "desc": "상대 페이스에 맞춰 곁에 있지만 \"괜찮아\"가 입버릇입니다", "cause": "힘들다고 하면 {애칭}에게 부담이 될 것 같아서, '괜찮아'로 넘기고 {애칭}의 속도에 맞추게 됩니다.", "root": "ROOT-76", "img": "assets/types/t02.png"}, {"n": "물범", "c": "기대기", "m": "거리두기", "desc": "힘든 일은 혼자 해결하고, 가까워지면 한 발 물러납니다", "cause": "내 몫의 힘든 일은 혼자 해결해야 {애칭}에게 짐이 되지 않는다고 여겨서, 다 끝낸 뒤에야 알리게 됩니다.", "root": "ROOT-76", "img": "assets/types/t03.png"}, {"n": "비버", "c": "기대기", "m": "조율하기", "desc": "거리를 재며 천천히 마음을 열지만, 너무 오래 재서 상대가 거리감을 느낄 때가 있습니다", "cause": "마음을 열었다가 상처받을까 조심스러워서, 충분히 가까워졌다고 확신이 들 때까지 거리를 재게 됩니다.", "root": "ROOT-58", "img": "assets/types/t04.png"}, {"n": "원앙", "c": "믿기", "m": "다가가기", "desc": "불안하면 묻고 확인하고 연락합니다", "cause": "{애칭}의 마음이 멀어질까 불안해서, 평온한 날에도 연락하고 마음을 확인하게 됩니다.", "root": "ROOT-41", "img": "assets/types/t05.png"}, {"n": "펭귄", "c": "믿기", "m": "맞춰주기", "desc": "떠날까 봐 더 맞춰주고, 서운해도 참습니다", "cause": "서운하다고 말하면 {애칭|이} 멀어질까 봐, 내 마음을 삼키고 더 맞춰 주게 됩니다.", "root": "ROOT-41", "img": "assets/types/t06.png"}, {"n": "왜가리", "c": "믿기", "m": "거리두기", "desc": "상처받기 전에 \"어차피\" 하며 마음을 먼저 거둡니다", "cause": "기대했다가 상처받을까 두려워서, '어차피' 하며 마음을 먼저 거두고 거리를 두게 됩니다.", "root": "ROOT-58", "img": "assets/types/t07.png"}, {"n": "백조", "c": "믿기", "m": "조율하기", "desc": "겉으로는 차분하게 사실과 해석을 나누지만, 속으로는 답장 하나에도 여러 생각을 합니다", "cause": "멀어진 건 아닐까 불안하지만 드러내면 안 될 것 같아서, 겉으로는 차분하게 지내며 답장 하나를 두고 혼자 여러 해석을 하게 됩니다.", "root": "ROOT-41", "img": "assets/types/t08.png"}, {"n": "복어", "c": "선 지키기", "m": "다가가기", "desc": "참다가 선을 넘으면 그동안 쌓인 것까지 한 번에 크게 터뜨려 알립니다", "cause": "작은 불편은 말하기 애매해 넘기다 보니, 선을 넘었다고 느끼는 순간 쌓인 것까지 한꺼번에 크게 터뜨리게 됩니다.", "root": "ROOT-81", "img": "assets/types/t09.png"}, {"n": "소라게", "c": "선 지키기", "m": "맞춰주기", "desc": "거절을 못 하고 상대의 취향과 일정에 맞춰 지냅니다", "cause": "거절하면 {애칭|이} 서운해할 것 같아서, 내키지 않아도 '응' 하고 내 일정과 취향을 뒤로 미루게 됩니다.", "root": "ROOT-77", "img": "assets/types/t10.png"}, {"n": "거북", "c": "선 지키기", "m": "거리두기", "desc": "선을 말하는 대신 답장을 늦추거나 자리를 피하며 혼자 물러납니다", "cause": "싫다고 말하면 {애칭|이} 서운해할 것 같아서, 거절하는 대신 답장을 늦추거나 자리를 피하게 됩니다.", "root": "ROOT-77", "img": "assets/types/t11.png"}, {"n": "조개", "c": "선 지키기", "m": "조율하기", "desc": "어디까지 괜찮은지 안에서 오래 따져 선을 정하지만, 결국 혼자 감당합니다", "cause": "내 기준을 말하면 {애칭|을} 불편하게 할 것 같아서, 선은 마음속으로만 정하고 결국 혼자 감당하게 됩니다.", "root": "ROOT-81", "img": "assets/types/t12.png"}, {"n": "물개", "c": "말하기", "m": "다가가기", "desc": "말은 꺼내는데 화·짜증 같은 겉감정으로 먼저 나갑니다", "cause": "서운하다는 약한 마음을 그대로 보이기 어려워서, 그 마음이 화나 짜증 같은 겉감정으로 먼저 나가게 됩니다.", "root": "ROOT-94", "img": "assets/types/t13.png"}, {"n": "돌고래", "c": "말하기", "m": "맞춰주기", "desc": "분위기를 맞추고 잘 들어주지만, 내 얘기는 \"말 안 해도 알겠지\" 합니다", "cause": "분위기를 깨고 싶지 않아서, '그때 서운했어'라는 말을 삼키고 '말 안 해도 알겠지' 하고 넘기게 됩니다.", "root": "ROOT-81", "img": "assets/types/t14.png"}, {"n": "혹등고래", "c": "말하기", "m": "거리두기", "desc": "\"말해 봐야 소용없지\" 하며 서운함을 말로 꺼내기도 전에 속으로 깊이 눌러 둡니다", "cause": "말해도 달라지지 않을 거라고 예상해서, 서운함을 말로 꺼내기 전에 속으로 눌러 두게 됩니다.", "root": "ROOT-50", "img": "assets/types/t15.png"}, {"n": "개구리", "c": "말하기", "m": "조율하기", "desc": "할 말을 고르고 다듬다 타이밍을 놓칩니다. 써 놓고 못 보낸 메시지가 많습니다", "cause": "잘 말하고 싶은 마음이 커서 문장을 다듬다 보니, 말할 때를 놓치게 됩니다.", "root": "ROOT-02", "img": "assets/types/t16.png"}, {"n": "문어", "c": "회복하기", "m": "다가가기", "desc": "다툰 뒤 빨리 풀고 싶어 전화, 메시지, 찾아가기로 계속 대화를 시도합니다. 상대가 준비 안 됐어도 말입니다", "cause": "다툰 일이 풀릴지가 {애칭}의 답에 달려 있어 기다리기가 불안해서, {애칭|이} 준비되기 전에 전화와 메시지로 대화를 서두르게 됩니다.", "root": "ROOT-98", "img": "assets/types/t17.png"}, {"n": "해파리", "c": "회복하기", "m": "맞춰주기", "desc": "다툰 뒤 내가 먼저 미안하다 하고 그냥 덮고 넘어갑니다. 원인은 남습니다", "cause": "다툰 분위기가 {애칭}에게 상처가 될까 봐 내 탓으로 돌려서, 원인은 이야기하지 않은 채 먼저 '미안해'로 덮게 됩니다.", "root": "ROOT-49", "img": "assets/types/t18.png"}, {"n": "가오리", "c": "회복하기", "m": "거리두기", "desc": "부딪힌 뒤 연락을 줄이고 조용히 지내다, 잠잠해지면 아무 일 없던 듯 다시 연락합니다", "cause": "부딪힌 뒤의 감정을 바로 마주하면 감당하기 버거울 것 같아서, 연락을 줄이고 조용히 물러나 있다가 아무 일 없던 듯 돌아오게 됩니다.", "root": "ROOT-65", "img": "assets/types/t19.png"}, {"n": "불가사리", "c": "회복하기", "m": "조율하기", "desc": "감정을 가라앉히고 원인을 정리한 뒤 다시 대화합니다. 그 사이 상대는 불안합니다", "cause": "원인이 분명히 정리돼야 제대로 말할 수 있다고 여겨서, 정리가 끝날 때까지 대화를 미루게 됩니다.", "root": "ROOT-99", "img": "assets/types/t20.png"}, {"n": "바다의 노인", "c": "말하기", "m": "거리두기", "desc": "사람에게는 말을 아끼고, 서운함도 힘든 일도 누구에게도 기대지 않고 혼자 견딥니다", "cause": "누구에게 기대도 짐이 될 것 같아서, 서운함도 힘든 일도 말하지 않고 혼자 견디게 됩니다.", "root": "ROOT-76", "img": "assets/types/t21.png"}], "modes": ["다가가기", "맞춰주기", "거리두기", "조율하기"], "loops": {"다가가기×다가가기": "서로 먼저 맞서는 사이", "다가가기×맞춰주기": "한쪽이 더 맞춰주는 사이", "다가가기×거리두기": "다가갈수록 멀어지는 사이", "다가가기×조율하기": "빠른 쪽과 정리하는 쪽의 속도 차이", "맞춰주기×맞춰주기": "서로 눈치 보며 얽힌 사이", "맞춰주기×거리두기": "말하지 않아 서로의 필요를 모르는 사이", "맞춰주기×조율하기": "조용히 배려하지만 말하지 않은 기대가 쌓이는 사이", "거리두기×거리두기": "조용하지만 멀어진 사이 (안내 문구 함께)", "거리두기×조율하기": "각자 정리하느라 연결 시간이 부족한 사이", "조율하기×조율하기": "안정적이지만 느린 사이"}, "fam": {"CPL-RETURN": {"cat": "돌아오는 시간 약속", "types": ["문어", "가오리", "불가사리", "원앙"], "roots": ["ROOT-98", "ROOT-65", "ROOT-53"], "t2": "쉬어 가기 약속 네 줄 함께 쓰기", "h2": "{애칭|과} 함께 네 줄을 채워 보세요. ① 쉬자고 할 때 하는 말 ② 다시 이야기할 시간 ③ 기다리는 쪽이 할 일 ④ 돌아와서 할 첫마디. 다 쓰면 사진으로 찍어 둘 다 저장합니다.", "tw": "이번 주 작은 의견 차이에 약속 한 번 써 보기", "hw": "이번 주에 메뉴나 일정처럼 작은 일로 의견이 갈리면, 네 줄 약속대로 쉬었다가 정한 시간에 다시 이야기해 보세요. 끝나고 '해 보니 어땠는지' 서로 한 줄씩 보냅니다."}, "CPL-ASK": {"cat": "작은 부탁 바꿔 하기", "types": ["혹등고래", "돌고래", "조개", "펭귄", "소라게", "거북"], "roots": ["ROOT-81", "ROOT-50", "ROOT-77"], "t2": "5분짜리 부탁 하나씩 바꿔 하기", "h2": "{애칭|과} 서로 5분 안에 들어줄 수 있는 부탁을 하나씩 해 보세요. '작은 건데'로 시작하고, 들은 쪽은 먼저 '알려 줘서 고마워'라고 답합니다. 들어주기 어려우면 대신 할 수 있는 것을 말해도 됩니다.", "tw": "주 1회 10분 '부탁 시간' 만들기", "hw": "이번 주에 10분을 정해 서로 다음 주에 바라는 것을 하나씩 말해 보세요. 들어줄 수 있는 것과 어려운 것을 솔직하게 나누고, 하나는 꼭 해 봅니다."}, "CPL-LEAN": {"cat": "기대는 연습", "types": ["수달", "해달", "물범", "비버", "바다의 노인"], "roots": ["ROOT-76", "ROOT-31"], "t2": "힘든 일 하나를 다 끝나기 전에 3분 털어놓기", "h2": "요즘 힘든 일 하나를 해결되기 전에 {애칭}에게 3분만 이야기해 보세요. 듣는 쪽은 해결책 대신 '그랬구나'와 궁금한 것 하나만 묻기로 미리 정합니다.", "tw": "이번 주 도움 하나 부탁하고 받기", "hw": "이번 주에 장보기, 서류 확인처럼 작은 도움 하나를 {애칭}에게 부탁해 보세요. 도움을 받으면 '미안해' 대신 '고마워'라고 말합니다."}, "CPL-CHECK": {"cat": "둘이 정한 연락 리듬", "types": ["원앙", "백조", "펭귄", "왜가리"], "roots": ["ROOT-41", "ROOT-90"], "t2": "서로 편한 연락 리듬 맞춰 보기", "h2": "하루에 몇 번, 어느 시간대 연락이 편한지 각자 적어 {애칭|과} 비교해 보세요. 두 답의 중간쯤으로 이번 주 리듬을 정합니다. 위치 공유나 답장 시간 확인은 약속에 넣지 않습니다.", "tw": "불안한 순간 한 번을 문장으로 말하기", "hw": "이번 주에 정한 리듬대로 지내 보고, 불안했던 순간 한 번은 연락을 더 보내는 대신 '답이 없어서 좀 불안했어'처럼 한 문장으로 {애칭}에게 말해 보세요."}, "CPL-LINE": {"cat": "서로의 선 지도", "types": ["소라게", "거북", "조개", "복어", "펭귄"], "roots": ["ROOT-77", "ROOT-49", "ROOT-81"], "t2": "서로의 선 지도 바꿔 보기", "h2": "연락 횟수·만나는 횟수·친구 모임·돈 쓰기 네 칸에 각자 '좋아 / 괜찮아 / 어려워'를 표시한 뒤 {애칭|과} 바꿔 보세요. 서로 다르게 표시한 칸 하나를 골라 10분 이야기합니다.", "tw": "상대의 '어려워' 칸 하나 지켜 주기", "hw": "이번 주 {애칭|이} '어려워'라고 표시한 칸 하나를 지켜 주는 행동을 한 가지 해 보세요. {애칭}도 내 칸 하나를 지켜 주기로 정합니다."}, "CPL-REPAIR": {"cat": "다툰 뒤 까닭 10분", "types": ["해파리", "문어", "불가사리", "가오리"], "roots": ["ROOT-49", "ROOT-53", "ROOT-99"], "t2": "사과 다음에 '왜' 10분 이야기하기", "h2": "최근 다툼 하나를 골라 {애칭|과} 10분만 이야기해 보세요. 각자 '그때 나는 ~가 걸렸어' 한 문장을 말하고, 듣는 쪽은 끝까지 들은 뒤 들은 말을 한 줄로 다시 말해 줍니다. 해결은 다음으로 미뤄도 됩니다.", "tw": "되풀이되는 다툼에 둘만의 규칙 하나 정하기", "hw": "이번 주에 자주 부딪히는 주제 하나를 골라 둘만의 규칙 하나를 정해 보세요. 예를 들어 '약속 시간은 하루 전에 다시 확인하기'처럼 작고 분명한 것이면 됩니다."}, "CPL-PACE": {"cat": "속도 맞추기", "types": ["비버", "불가사리", "개구리", "문어", "수달"], "roots": ["ROOT-99", "ROOT-58", "ROOT-98"], "t2": "중요한 이야기 전에 세 줄 먼저 보내기", "h2": "이야기할 일이 생기면 정리가 필요한 쪽이 핵심을 세 줄로 먼저 보내고, 그다음에 대화를 시작해 보세요. 빠른 쪽은 세 줄을 읽고 질문 하나만 먼저 합니다.", "tw": "이번 주 결정 하나를 순서대로 정하기", "hw": "이번 주에 정할 일 하나를 '빠른 쪽이 제안 → 정리하는 쪽이 하룻밤 생각 → 다음 날 같이 결정' 순서로 정해 보세요."}, "CPL-SOFT": {"cat": "겉감정 아래 한 문장", "types": ["물개", "복어", "원앙"], "roots": ["ROOT-94", "ROOT-55", "ROOT-53"], "t2": "화 말고 다른 감정 낱말로 말해 보기", "h2": "최근 부딪힌 일 하나를 두고 '화' 말고 다른 감정 낱말(서운함·걱정·외로움·억울함) 하나씩을 골라 {애칭}에게 말해 보세요. 듣는 쪽은 '그런 마음이었구나'로만 답합니다.", "tw": "다툴 뻔한 순간 한 번, 멈춤 뒤 속마음 한 문장", "hw": "이번 주 다툴 뻔한 순간이 오면 멈춤 말을 쓰고, 10분 뒤 '사실은 ~해서 서운했어' 한 문장으로 다시 시작해 보세요."}, "CPL-GOOD": {"cat": "좋은 순간 함께 남기기", "types": ["백조", "불가사리", "조개", "비버", "모든 유형"], "roots": ["ROOT-80", "ROOT-13", "ROOT-53"], "t2": "함께 찍은 사진 하나에 좋았던 점 한 줄씩 붙이기", "h2": "{애칭|과} 함께 찍은 사진 하나를 골라 그날 좋았던 점을 한 줄씩 붙여 보세요. 사진과 두 줄을 함께 저장합니다.", "tw": "이번 주 '처음 해 보는 것' 데이트 하나", "hw": "이번 주에 둘 다 처음 가 보는 동네나 처음 먹어 보는 메뉴 하나를 골라 함께해 보세요. 끝나고 가장 좋았던 순간을 한 줄씩 남깁니다."}, "CPL-WALK": {"cat": "나란히 걷는 대화", "types": ["가오리", "혹등고래", "왜가리", "물범", "바다의 노인"], "roots": ["ROOT-26", "ROOT-65", "ROOT-58"], "t2": "걸으며 마음에 걸리는 일 하나씩 꺼내기", "h2": "{애칭|과} 걸으며 요즘 마음에 걸리는 일을 하나씩 꺼내 보세요. 마주 앉지 않고 나란히 걸으면 말을 꺼내기가 한결 쉽습니다. 해결하지 않아도 됩니다.", "tw": "이번 주 30분 산책 데이트", "hw": "이번 주에 30분 산책 데이트를 하고, 끝날 때 '다음에 이야기하고 싶은 것' 하나씩을 말해 두세요."}}, "pc": {"_note": "2026-11-26 CSO 결정: 상대가 테스트만 끝내면 열림(결제 없음). 상대 결과는 연결·저장하지 않고, 내가 상대 결과 화면을 보고 드롭다운으로 두 유형을 고름. 10쪽 상자 → [우리 생각의 차이는 뭘까?] → 11·12쪽 열림. 그 전 11·12쪽은 잠금 안내만.", "unlock": "상대가 테스트를 끝내고, 내가 두 유형을 고르면 열림(결제 없음)", "box": {"title": "{애칭}의 결과는 어떻게 나왔나요?", "sub": "{애칭}의 결과 화면 1쪽(자기 유형)과 2쪽(내 눈에 비친 상대)에 나온 유형을 골라 주세요.", "select_partner_self": "{애칭}(나)", "select_partner_view_me": "{이름}(상대)", "placeholder": "유형 고르기", "button": "우리 생각의 차이는 뭘까?", "invite": "{애칭|이} 아직 안 했다면 테스트 보내기", "invite_note": "{애칭}의 결과는 저장되지 않고, 고른 유형으로 이 화면에서만 비교합니다."}, "locked": "{애칭}의 테스트 결과까지 넣어 주시면 볼 수 있습니다.", "pages": [{"page": 11, "key": "gap", "title": "우리 생각의 차이는 뭘까?"}, {"page": 12, "key": "gap_actions", "title": "생각의 차이를 좁히는 서로 해볼 일"}], "options": "types 20개(+ 히든 바다의 노인, 맨 아래 '히든'으로 표시)", "mode_actions": {"다가가기": "먼저 다가가는", "맞춰주기": "상대에게 맞춰 주는", "거리두기": "한 발 물러나는", "조율하기": "혼자 정리하고 조율하는"}, "gap_kinds": {"same": {"title": "같게 봤습니다", "body": "{보는이|이} 본 {대상}과 {대상|이} 본 자기 모습이 같습니다. 겉으로 하는 행동과 그 이유가 그대로 닿고 있습니다.", "action": "이미 잘 보고 있는 부분입니다. {보는이|은} '그때 네가 ~해서 그런 거 알았어'처럼 알아본 순간 하나를 {대상}에게 말해 주세요."}, "mode_same": {"title": "행동은 보였고, 이유가 다르게 닿았습니다", "body": "두 유형 모두 '{방식}'입니다. {대상|이} {방식행동} 모습은 {보는이}에게도 보였습니다. 다른 것은 그 이유입니다.", "why": "이유는 속에서 일어나는 일이라 밖에서는 잘 보이지 않습니다. 그래서 같은 행동을 보고도 서로 다른 이유를 짐작하게 됩니다.", "action": "{대상|이} 이유를 먼저 알려 주세요. 이 화면의 '{대상} 안에서는' 문장을 함께 보며 '나는 사실 이래서 그랬던 것 같아'로 시작하면 됩니다. {보는이|은} '내 눈엔 이렇게 보였어' 하고 본 장면 하나를 말해 줍니다."}, "comp_same": {"title": "애쓰는 자리는 같게 봤고, 드러나는 방식이 다르게 보였습니다", "body": "두 유형 모두 '{역량}'에서 애쓰는 사람입니다. 다만 {대상|이} 겉으로 하는 행동은 {보는이} 눈에 '{보인방식}' 쪽으로 보였습니다.", "why": "같은 일에 애쓰더라도 상대에게 닿는 건 겉으로 드러난 행동입니다.", "action": "{대상|이} 요즘 애쓰는 일을 하나 말하고, {보는이|은} 그때 {대상}의 어떤 행동이 보였는지 말해 주세요. 같은 일을 두고 겉과 속이 어떻게 달랐는지 맞춰 보는 대화입니다."}, "both_diff": {"title": "보여 주는 모습과 이유가 모두 다르게 닿았습니다", "body": "{대상}의 속 이유와 겉 행동이 모두 {보는이}에게 다르게 닿고 있습니다.", "why": "서로 이야기해 볼 거리가 가장 많은 곳입니다. 어느 쪽이 맞는지보다, 어떤 장면에서 그렇게 보였는지가 중요합니다.", "action": "서로의 결과 카드를 한 장씩 소리 내어 읽어 주세요. {대상|이} 자기 카드에서 '맞아' 싶은 문장 하나, '이건 아니야' 싶은 문장 하나를 고르면 됩니다."}, "projection": {"body": "{보는이|은} {대상|을} 자기와 같은 유형으로 봤습니다. 상대의 행동을 내가 움직이는 이유로 읽었을 수 있습니다.", "action": "{보는이|은} '너도 나처럼 그렇지?' 대신 '너는 어떨 때 그래?'로 물어보세요."}}, "lines": {"inside": "{대상} 안에서는", "outside": "{보는이} 눈에는", "about_me": "나를 두고 생긴 차이", "about_partner": "{애칭|을} 두고 생긴 차이", "loops_same": "두 사람이 그린 고리가 같습니다: {고리}", "loops_diff": "{이름}님은 '{내고리}'로, {애칭|은} '{상대고리}'로 두 사람 사이를 그렸습니다.", "together": "둘이 함께 해 볼 것", "together_rule": "나를 두고 생긴 차이에는 내 유형(내가 본 나)의 작심삼일 가족 2일차, {애칭|을} 두고 생긴 차이에는 {애칭}의 자기 유형 가족 2일차. 같으면 하나만. 가족은 couple_activities.families[].types에서 먼저 찾고, 없으면 그 유형의 type_roots.main이 들어간 가족", "closing": "이 차이를 쏘웰라와 이어서 이야기하기"}, "never": ["누가 맞고 틀렸다고 쓰지 않음", "상대 점수·문항 답·약점은 받지도 보여 주지도 않음", "안전 신호가 있는 결과에서는 상자를 보이지 않음"]}};
+  var ME = { name: "지민", self: "문어", viewP: "혹등고래" }, P = { name: "서준" };
+  var T = {}; D.types.forEach(function (x) { T[x.n] = x; });
+  function bat(w) { var c = String(w).slice(-1).charCodeAt(0); return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0; }
+  var PR = { "은": ["은","는"], "는": ["은","는"], "이": ["이","가"], "가": ["이","가"], "을": ["을","를"], "를": ["을","를"], "과": ["과","와"], "와": ["과","와"] };
+  function R(s, v) { return String(s).replace(/\{([^{}|]+)(?:\|([^{}]+))?\}/g, function (m, k, p) { var w = v[k]; if (w == null) return m; return p ? w + (PR[p] ? (bat(w) ? PR[p][0] : PR[p][1]) : p) : w; }); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  var sSelf = document.getElementById("selSelf"), sView = document.getElementById("selView"), btn = document.getElementById("goGap");
+  [sSelf, sView].forEach(function (sel) {
+    sel.innerHTML = '<option value="">유형 고르기</option>';
+    ["기대기","믿기","선 지키기","말하기","회복하기"].forEach(function (c) {
+      var g = document.createElement("optgroup"); g.label = c;
+      D.types.filter(function (x) { return x.c === c && x.n !== "바다의 노인"; }).forEach(function (x) { var o = document.createElement("option"); o.value = x.n; o.textContent = x.n + " · " + x.m; g.appendChild(o); });
+      sel.appendChild(g);
+    });
+    var g = document.createElement("optgroup"); g.label = "히든"; var o = document.createElement("option"); o.value = "바다의 노인"; o.textContent = "바다의 노인 · 히든"; g.appendChild(o); sel.appendChild(g);
+    sel.addEventListener("change", function () { btn.disabled = !(sSelf.value && sView.value); try { localStorage.setItem("pc", JSON.stringify([sSelf.value, sView.value])); } catch (e) {} });
+  });
+  try { var sv = JSON.parse(localStorage.getItem("pc") || "null"); if (sv) { sSelf.value = sv[0]; sView.value = sv[1]; btn.disabled = !(sv[0] && sv[1]); } } catch (e) {}
+  document.addEventListener("click", function (e) { var b = e.target.closest("[data-go]"); if (b) window.__go(+b.dataset.go - 1); });
+  var M = D.modes;
+  function loopKey(a, b) { var x = [a, b].sort(function (p, q) { return M.indexOf(p) - M.indexOf(q); }); return x.join("×"); }
+  function loopName(a, b) { return (D.loops[loopKey(a, b)] || "").replace(/\s*\(.*\)$/, ""); }
+  function kind(s, v) { if (s === v) return "same"; var A = T[s], B = T[v]; if (A.m === B.m) return "mode_same"; if (A.c === B.c) return "comp_same"; return "both_diff"; }
+  function famFor(n) { var k; for (k in D.fam) if (D.fam[k].types.indexOf(n) >= 0) return k; for (k in D.fam) if (D.fam[k].roots.indexOf(T[n].root) >= 0) return k; return "CPL-GOOD"; }
+  function card(lbl, n, other) { var x = T[n]; return '<div class="mini' + (other ? " other" : "") + '"><span>' + esc(lbl) + '</span><img src="' + x.img + '" alt=""><b>' + esc(n) + '</b><span>' + esc(x.c + " × " + x.m) + '</span></div>'; }
+  function gapBlock(head, target, viewer, s, v, otherOfTarget, projected) {
+    var k = kind(s, v), G = D.pc.gap_kinds[k];
+    var vars = { "대상": target, "보는이": viewer, "방식": T[s].m, "방식행동": D.pc.mode_actions[T[s].m], "역량": T[s].c, "보인방식": T[v].m };
+    var h = '<div class="gap"><span class="k">' + esc(head) + " · " + esc(target) + " " + esc(s) + " ↔ " + esc(R("{x|이} 본 ", {x: viewer})) + esc(v) + '</span><h3>' + esc(G.title) + '</h3><p>' + esc(R(G.body, vars)) + '</p>';
+    if (k !== "same") h += '<div class="vs"><p><b>' + esc(target) + ' 안에서는</b>' + esc(R(T[s].cause, { "애칭": otherOfTarget })) + '</p><p><b>' + esc(viewer) + ' 눈에는</b>' + esc(R(T[v].cause, { "애칭": otherOfTarget })) + '</p></div><p class="small" style="margin:0">' + esc(G.why) + '</p>';
+    if (projected) h += '<p class="proj">' + esc(R(D.pc.gap_kinds.projection.body, vars)) + '</p>';
+    return { html: h + '</div>', kind: k, vars: vars, projected: projected };
+  }
+  function show() {
+    var pS = sSelf.value, pV = sView.value; if (!pS || !pV) return;
+    var a = gapBlock("나를 두고 생긴 차이", ME.name, P.name, ME.self, pV, P.name, pV === pS && pV !== ME.self);
+    var b = gapBlock(R("{애칭|을} 두고 생긴 차이", { "애칭": P.name }), P.name, ME.name, pS, ME.viewP, ME.name, ME.viewP === ME.self && ME.viewP !== pS);
+    var l1 = loopName(T[ME.self].m, T[ME.viewP].m), l2 = loopName(T[pS].m, T[pV].m);
+    var lc = l1 === l2 ? "두 사람이 그린 고리가 같습니다: " + l1 : ME.name + "님은 '" + l1 + "'로, " + R("{애칭|은}", { "애칭": P.name }) + " '" + l2 + "'로 두 사람 사이를 그렸습니다.";
+    document.getElementById("gapOut").innerHTML =
+      '<div class="four">' + card("내가 본 나", ME.self) + card("내가 본 " + P.name, ME.viewP) + card(R("{x|이} 본 ", {x: P.name}) + P.name, pS, true) + card(R("{x|이} 본 나", {x: P.name}), pV, true) + '</div>' +
+      a.html + b.html + '<div class="loopcmp">' + esc(lc) + '</div>' +
+      '<p class="small" style="margin:0">누가 맞고 틀린 것이 아닙니다. 서로의 행동은 보였고, 그 이유를 각자 다르게 짐작했을 수 있습니다.</p>';
+    function actBlock(g, head) {
+      var x = '<div class="act"><span class="k">' + esc(head) + '</span><p>' + esc(R(D.pc.gap_kinds[g.kind].action, g.vars)) + '</p>';
+      if (g.projected) x += '<p>' + esc(R(D.pc.gap_kinds.projection.action, g.vars)) + '</p>';
+      return x + '</div>';
+    }
+    var shown = ["CPL-RETURN"], extra = [];
+    [famFor(ME.self), famFor(pS)].forEach(function (k) { if (shown.indexOf(k) < 0) { shown.push(k); extra.push(k); } });
+    var tg = extra.map(function (k) { var F = D.fam[k], v = { "애칭": P.name }; return '<article class="pc together"><header><b>' + esc(F.cat) + '</b><span>둘이 함께 · 2일차 대신 또는 1주일에</span></header><div class="body"><p class="ttl">' + esc(R(F.t2, v)) + '</p><p class="row">' + esc(R(F.h2, v)) + '</p><p class="src">연인과 함께 하는 작심삼일 · ' + k + '</p></div></article>'; }).join("");
+    document.getElementById("actOut").innerHTML = actBlock(a, "나를 두고 생긴 차이") + actBlock(b, R("{애칭|을} 두고 생긴 차이", { "애칭": P.name }));
+    var ex = document.getElementById("extraOut");
+    if (extra.length) { ex.innerHTML = '<h2 style="margin-top:6px">생각의 차이를 좁히는 데 더해 볼 것</h2>' + tg; ex.hidden = false; }
+    ["gapOut", "actOut"].forEach(function (id) { document.getElementById(id).hidden = false; });
+    document.querySelectorAll("[data-lock]").forEach(function (x) { x.hidden = true; });
+  }
+  btn.addEventListener("click", function () { show(); window.__go(10); });
+  if (!btn.disabled) show();
 })();
 </script>
 

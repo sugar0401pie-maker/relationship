@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import * as S from "./scoring.js";
 import { buildResultView, parseReport, trimScores } from "./pages.ts";
+import { buildCompare, gapKind } from "./compare.ts";
 import type { RelResult } from "./result.ts";
 import type { Manifest } from "./images.ts";
 
@@ -33,12 +34,14 @@ test("21×21 조합 × 관계 2 × 이름 2: 결과 10쪽 문구에 남은 자�
   let n = 0;
   for (const a of D.types) for (const b of D.types) for (const rel of ["연애", "결혼·동거"] as const) for (const [name, nick] of [["혜진", "민수"], ["지우", "지훈"]]) {
     const v = buildResultView(D, M, { id: `t-${a.name}-${b.name}`, createdAt: "", name, nickname: nick, relationship: rel, r: fakeResult(a.name, b.name) });
-    const text = walk(v.pages).join("\n");
+    const { compare, ...rest } = v.pages; // compare는 브라우저에서 렌더하는 원문 틀이라 아래 비교 테스트에서 따로 본다
+    const text = walk(rest).join("\n");
+    assert.ok(compare.types.length === 21);
     const m = text.match(BAD);
     assert.equal(m, null, `${a.name}→${b.name} ${rel} ${nick}: ${m?.[0]} … ${text.slice(Math.max(0, (m?.index ?? 0) - 40), (m?.index ?? 0) + 40)}`);
     assert.ok(v.pages.p4.pic || v.pages.p4.side, "4쪽 그림 없음");
-    assert.equal(v.pages.images.length, 6);
-    assert.equal(new Set(v.pages.images.map((p) => p.src)).size, 6, "그림 중복");
+    assert.equal(v.pages.images.length, 8);
+    assert.equal(new Set(v.pages.images.map((p) => p.src)).size, 8, "그림 중복");
     n++;
   }
   assert.equal(n, 21 * 21 * 4);
@@ -63,4 +66,39 @@ test("AI 본문 나누기: 말머리·첫째/둘째/셋째·채팅권 문단 처
 test("점수 표기: 끝의 0을 뺀다", () => {
   assert.equal(trimScores("겉이 4.00점, 속이 3.50점, 합계 2.25점, 1.00 점"), "겉이 4점, 속이 3.5점, 합계 2.25점, 1 점");
   assert.equal(trimScores("2026.11.25 10.50점"), "2026.11.25 10.5점");
+});
+
+test("10~12쪽 비교: 21×21 내 결과 × 상대가 고른 유형 조합 일부 — 자리표시·조사 오류 없음, 판정 4종", () => {
+  const names = D.types.map((t: { name: string }) => t.name);
+  const kinds = new Set<string>();
+  let n = 0;
+  for (const a of names) for (const b of names) {
+    const v = buildResultView(D, M, { id: "c", createdAt: "", name: "혜진", nickname: "민수", relationship: "연애", r: fakeResult(a, b) });
+    for (const [ps, pv] of [[b, a], [a, b], [names[(names.indexOf(a) + 5) % 21], names[(names.indexOf(b) + 9) % 21]]]) {
+      const c = buildCompare(v.pages.compare, ps, pv)!;
+      assert.ok(c, `${a}/${b}/${ps}/${pv}`);
+      const text = walk([c.aboutMe, c.aboutPartner, c.loops, c.extra, c.cards.map((x) => x.label)]).join("\n");
+      const m = text.match(BAD);
+      assert.equal(m, null, `${a}→${b} 상대 ${ps}/${pv}: ${m?.[0]}`);
+      kinds.add(c.aboutMe.kind); kinds.add(c.aboutPartner.kind);
+      assert.ok(!c.extra.some((f) => f.code === v.pages.compare.loopFamily), "작심삼일 가족이 '더해 볼 것'에 다시 나옴");
+      n++;
+    }
+  }
+  assert.deepEqual([...kinds].sort(), ["both_diff", "comp_same", "mode_same", "same"]);
+  assert.equal(n, 21 * 21 * 3);
+});
+
+test("비교 판정: 같음·방식만·역량만·둘 다 다름 + 덧붙임(상대를 나와 같은 유형으로 봄)", () => {
+  const v = buildResultView(D, M, { id: "c", createdAt: "", name: "지민", nickname: "서준", relationship: "연애", r: fakeResult("문어", "혹등고래") });
+  const T = Object.fromEntries(v.pages.compare.types.map((t) => [t.name, t]));
+  assert.equal(gapKind(T, "문어", "문어"), "same");
+  assert.equal(gapKind(T, "문어", "수달"), "mode_same");
+  assert.equal(gapKind(T, "문어", "해파리"), "comp_same");
+  assert.equal(gapKind(T, "문어", "펭귄"), "both_diff");
+  // 서준이 자기를 물개로, 나도 물개로 봄 → 서준이 나를 자기와 같은 유형으로 봄(내 실제 유형 문어와 다름) → 덧붙임
+  const c = buildCompare(v.pages.compare, "물개", "물개")!;
+  assert.ok(c.aboutMe.projection && c.aboutMe.projectionAction);
+  assert.ok(!c.aboutPartner.projection);
+  assert.ok(c.loops.includes("지민님은"));
 });

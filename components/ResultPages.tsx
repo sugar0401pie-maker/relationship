@@ -7,12 +7,13 @@ import { useRouter } from "next/navigation";
 import Shell from "./Shell";
 import Radar from "./Radar";
 import { api } from "@/lib/client/api";
+import { buildCompare, type CompareData } from "@/lib/rel/compare";
 import { preloadKakao, shareKakaoCard } from "@/lib/client/kakaoShare";
 import KakaoTalkLogo from "./share/KakaoTalkLogo";
 import type { ResultPayload } from "@/lib/server/sessions";
 import type { Block, TypeCard as TC } from "@/lib/rel/pages";
 
-const PAGES = 10;
+const PAGES = 12;
 const SOWELLA_URL = "https://app.ssolwellnesshouse.com";
 const cache = new Map<string, ResultPayload>(); // 쪽을 넘길 때마다 다시 받지 않게(리포트가 만들어지는 중이면 따로 다시 묻는다)
 
@@ -90,6 +91,18 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
   const [flipped, setFlipped] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const kicked = useRef(0);
+  // 10쪽에서 고른 상대 유형 두 개. 서버로 보내지 않고 이 기기 브라우저에만 둔다(partner_compare: 상대 결과는 저장하지 않음).
+  const [pick, setPick] = useState<[string, string]>(["", ""]);
+  useEffect(() => {
+    try {
+      const v = JSON.parse(localStorage.getItem(`rel-pc-${id}`) ?? "null");
+      if (Array.isArray(v) && v.length === 2) queueMicrotask(() => setPick([String(v[0] ?? ""), String(v[1] ?? "")]));
+    } catch { /* 저장소를 못 쓰면 매번 고른다 */ }
+  }, [id]);
+  const choose = (v: [string, string]) => {
+    setPick(v);
+    try { localStorage.setItem(`rel-pc-${id}`, JSON.stringify(v)); } catch { /* 무시 */ }
+  };
 
   const load = useCallback(async () => {
     try {
@@ -130,7 +143,7 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
     return () => window.removeEventListener("keydown", onKey);
   });
   const touch = useRef<number | null>(null);
-  useEffect(() => { if (page === 4 || page === 10) preloadKakao(); }, [page]);
+  useEffect(() => { if (page === 4 || page === 10 || page === 12) preloadKakao(); }, [page]);
 
   async function retry() {
     await api(`/api/rel/result/${id}/report`, { method: "POST", body: { retry: true } }).catch(() => {});
@@ -187,12 +200,26 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
     </article>
   );
 
+  const cmp = data && pick[0] && pick[1] ? buildCompare(data.view.pages.compare, pick[0], pick[1]) : null;
+
+  // [테스트 보내기]: 연인에게 테스트 자체를 카카오톡으로(결과·이름은 넣지 않음). 실패하면 공유창 → 링크 복사.
+  async function invite() {
+    const url = window.location.origin + "/";
+    const title = "강에 사는 나, 바다에 사는 너";
+    const description = "나와 내 눈에 비친 연인은 어떤 바다 친구일까? 38개 장면으로 알아보는 쏠 마을 관계 테스트";
+    if (await shareKakaoCard({ title, description, imageUrl: window.location.origin + "/images/intro.jpg", imageWidth: 800, imageHeight: 1000, url, button: "테스트 하러 가기" })) return;
+    try {
+      if (navigator.share) await navigator.share({ title, text: `${description}\n${url}` });
+      else { await navigator.clipboard.writeText(url); setToast("링크를 복사했습니다"); setTimeout(() => setToast(null), 1800); }
+    } catch { /* 닫은 경우 */ }
+  }
+
   if (err) return <Shell><p className="err-box">{err}</p></Shell>;
   if (!data) return <Shell><div className="wait"><div className="wave-dot" aria-label="불러오는 중" /></div></Shell>;
   const v = data.view, P = v.pages;
   const img = (n: number) => P.images[n - 5];
   const ai = data.report.sections;
-  const nextLabel = page === 3 ? P.p3.next : page === 8 ? "실천 카드 보기" : page === 9 ? "쏘웰라로 이어가기" : page === 10 ? "처음으로" : "다음";
+  const nextLabel = page === 3 ? P.p3.next : page === 8 ? "실천 카드 보기" : page === 9 ? `${v.nickname} 결과와 맞춰 보기` : page === PAGES ? "처음으로" : "다음";
 
   const aiPage = (no: 4 | 5 | 6 | 7 | 8, moments: boolean) => (
     <>
@@ -296,39 +323,123 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
       <h1>이번 주 실천 카드</h1>
       {img(9) && <figure className="illus"><img src={img(9)!.src} alt={img(9)!.alt} /></figure>}
       {ai?.[8] ? <Blocks blocks={ai[8]} /> : <ReportWait r={data.report} teaser={P.ai[8].teaser} onRetry={retry} />}
-      {P.p9.cards.filter((c) => !c.together).map((c) => card(c))}
-      <h2 style={{ marginTop: 6 }}>{v.nickname}과 함께</h2>
-      {P.p9.cards.filter((c) => c.together).map((c, i) => card(c, i + 1))}
-      {P.p9.plan.length > 0 && (
-        <>
-        <h2 style={{ marginTop: 6 }}>{P.p9.planTitle}</h2>
-        <section className="plan">
-          <p className="small" style={{ margin: 0 }}>하루에 하나씩, 둘이 함께 해 보는 계획입니다.</p>
-          <ol>
-            {P.p9.plan.map((s) => (
-              <li key={s.day}><span className={`day${s.both ? " both" : ""}`}>{s.day}<br />{s.day === "3일차" ? "돌아보기" : s.both ? "둘이" : "나"}</span>
-                <div><p className="t">{s.title}</p>{s.how && <p className="h">{s.how}</p>}{s.tired && <p className="tired">지친 날이면 대신: {s.tired}</p>}</div>
-              </li>
-            ))}
-          </ol>
-          {P.p9.solo && <p className="tired" style={{ margin: 0 }}>{P.p9.solo}</p>}
-        </section>
-        </>
-      )}
+      <p className="small">{P.p9.note}</p>
+      {P.p9.cards.map((c) => card(c))}
     </>
   );
   else if (page === 10) body = (
     <>
       <h1>{P.p10.title}</h1>
       {img(10) && <figure className="illus"><img src={img(10)!.src} alt={img(10)!.alt} /></figure>}
+      <p>{firstBold(P.p10.intro)}</p>
+      <div className="pbox">
+        <p className="small" style={{ margin: 0 }}>{P.p10.sub}</p>
+        <div className="sel">
+          <label htmlFor="selSelf">{P.p10.selSelf}</label>
+          <TypeSelect id="selSelf" value={pick[0]} onChange={(x) => choose([x, pick[1]])} placeholder={P.p10.placeholder} cmp={P.compare} />
+          <label htmlFor="selView">{P.p10.selView}</label>
+          <TypeSelect id="selView" value={pick[1]} onChange={(x) => choose([pick[0], x])} placeholder={P.p10.placeholder} cmp={P.compare} />
+        </div>
+        <button className="go" disabled={!cmp} onClick={() => go(11)}>{P.p10.button}</button>
+        <button className="inv" onClick={invite}>{P.p10.invite}</button>
+        <p className="small" style={{ margin: 0 }}>{P.p10.inviteNote}</p>
+      </div>
+    </>
+  );
+  else if (page === 11) body = (
+    <>
+      <h1>{P.p11.title}</h1>
+      {img(11) && <figure className="illus"><img src={img(11)!.src} alt={img(11)!.alt} /></figure>}
+      {!cmp ? (
+        <Locked text={P.p11.locked} button={P.p11.lockButton} onGo={() => go(10)} />
+      ) : (
+        <>
+          <div className="four">
+            {cmp.cards.map((c) => (
+              <div key={c.label} className={`mini${c.other ? " other" : ""}`}><span>{c.label}</span>{c.type.img && <img src={c.type.img} alt="" />}<b>{c.type.name}</b><span>{c.type.comp} × {c.type.mode}</span></div>
+            ))}
+          </div>
+          {[cmp.aboutMe, cmp.aboutPartner].map((g) => (
+            <div key={g.head} className="gap">
+              <span className="k">{g.head} · {g.label}</span>
+              <h3>{g.title}</h3>
+              <p>{g.body}</p>
+              {g.inside && g.outside && (
+                <div className="vs">
+                  <p><b>{g.inside.who}</b>{g.inside.text}</p>
+                  <p><b>{g.outside.who}</b>{g.outside.text}</p>
+                </div>
+              )}
+              {g.why && <p className="small" style={{ margin: 0 }}>{g.why}</p>}
+              {g.projection && <p className="proj">{g.projection}</p>}
+            </div>
+          ))}
+          <div className="loopcmp">{cmp.loops}</div>
+          <p className="small" style={{ margin: 0 }}>{P.p11.notJudge}</p>
+        </>
+      )}
+    </>
+  );
+  else if (page === 12) body = (
+    <>
+      <h1>{P.p12.title}</h1>
+      {img(12) && <figure className="illus"><img src={img(12)!.src} alt={img(12)!.alt} /></figure>}
+      <h2>{P.p12.talkTitle}</h2>
+      {!cmp ? (
+        <Locked text={P.p11.locked} button={P.p11.lockButton} onGo={() => go(10)} />
+      ) : (
+        [cmp.aboutMe, cmp.aboutPartner].map((g) => (
+          <div key={g.head} className="act">
+            <span className="k">{g.head}</span>
+            <p>{g.action}</p>
+            {g.projectionAction && <p>{g.projectionAction}</p>}
+          </div>
+        ))
+      )}
+      {P.p12.plan.length > 0 && (
+        <>
+          <h2 style={{ marginTop: 6 }}>{P.p12.planTitle}</h2>
+          <section className="plan">
+            <p className="small" style={{ margin: 0 }}>{P.p12.planNote}</p>
+            <ol>
+              {P.p12.plan.map((s) => (
+                <li key={s.day}><span className={`day${s.both ? " both" : ""}`}>{s.day}<br />{s.day === "3일차" ? "돌아보기" : s.both ? "둘이" : "나"}</span>
+                  <div>
+                    <p className="t">{s.title}</p>
+                    {s.how && <p className="h">{s.how}</p>}
+                    {s.ex?.map((e) => <p key={e} className="h">{e}</p>)}
+                    {s.role && <p className="role">{s.role}</p>}
+                    {s.tired && <p className="tired">지친 날이면 대신: {s.tired}</p>}
+                  </div>
+                </li>
+              ))}
+            </ol>
+            {P.p12.planWhy && <p className="why" style={{ margin: 0 }}>{P.p12.planWhy}</p>}
+            {P.p12.solo && <p className="tired" style={{ margin: 0 }}>{P.p12.solo}</p>}
+            <p className="src" style={{ margin: 0 }}>{P.p12.planSrc}</p>
+          </section>
+        </>
+      )}
+      {cmp && cmp.extra.length > 0 && (
+        <>
+          <h2 style={{ marginTop: 6 }}>{P.p12.extraTitle}</h2>
+          {cmp.extra.map((f) => (
+            <article key={f.code} className="pc together">
+              <header><b>{f.cat}</b><span>둘이 함께 · 2일차 대신 또는 1주일에</span></header>
+              <div className="body"><p className="ttl">{f.title}</p><p className="row">{f.how}</p><p className="src">연인과 함께 하는 작심삼일 · {f.code}</p></div>
+            </article>
+          ))}
+        </>
+      )}
+      <h2 style={{ marginTop: 6 }}>{P.p12.sowellaTitle}</h2>
       <div className="chat">
-        {P.p10.bubble && <p className="bubble">{P.p10.bubble}</p>}
-        {P.p10.bubble && <p className="small" style={{ margin: 0 }}>↑ 2일차에 쏘웰라가 먼저 보내는 말(예시)</p>}
-        <div className="starters">{P.p10.starters.map((q) => <button key={q} onClick={() => window.open(SOWELLA_URL, "_blank", "noopener")}>{q}</button>)}</div>
+        {P.p12.bubble && <p className="bubble">{P.p12.bubble}</p>}
+        {P.p12.bubble && <p className="small" style={{ margin: 0 }}>↑ 2일차에 쏘웰라가 먼저 보내는 말(예시)</p>}
+        <div className="starters">{P.p12.starters.map((q) => <button key={q} onClick={() => window.open(SOWELLA_URL, "_blank", "noopener")}>{q}</button>)}</div>
       </div>
       <button className="cta" onClick={() => window.open(SOWELLA_URL, "_blank", "noopener")}>쏘웰라와 이야기 시작하기</button>
       <ShareRow onShare={share} onSave={() => window.print()} onCopy={copyLink} saveLabel="리포트 저장" />
-      <p className="disclaimer">{P.p10.disclaimer}</p>
+      <p className="disclaimer">{P.p12.disclaimer}</p>
     </>
   );
 
@@ -342,7 +453,7 @@ export default function ResultPages({ id, page, initial, base = "/result" }: { i
   const bottom = (
     <nav className="nav">
       <button className="prev" disabled={page <= 1} onClick={() => go(page - 1)}>이전</button>
-      <button className="next" onClick={() => (page === 10 ? router.push("/") : go(page + 1))}>{nextLabel}</button>
+      <button className="next" onClick={() => (page === PAGES ? router.push("/") : go(page + 1))}>{nextLabel}</button>
     </nav>
   );
   return (
@@ -393,5 +504,26 @@ function ShareRow({ onShare, onSave, onCopy, saveLabel }: { onShare: () => void;
       <button onClick={onSave}>{saveLabel}</button>
       <button onClick={onCopy}>링크 복사</button>
     </div>
+  );
+}
+
+function Locked({ text, button, onGo }: { text: string; button: string; onGo: () => void }) {
+  return (
+    <div className="lockbox"><p>{text}</p><button onClick={onGo}>{button}</button></div>
+  );
+}
+
+// 상대 유형 고르기: 20유형을 역량별로 묶고, 맨 아래 '히든'(바다의 노인) — partner_compare.options
+function TypeSelect({ id, value, onChange, placeholder, cmp }: { id: string; value: string; onChange: (v: string) => void; placeholder: string; cmp: CompareData }) {
+  return (
+    <select id={id} value={value} onChange={(e) => onChange(e.target.value)}>
+      <option value="">{placeholder}</option>
+      {cmp.comps.map((c) => (
+        <optgroup key={c} label={c}>
+          {cmp.types.filter((t) => t.comp === c && t.name !== "바다의 노인").map((t) => <option key={t.name} value={t.name}>{t.name} · {t.mode}</option>)}
+        </optgroup>
+      ))}
+      <optgroup label="히든"><option value="바다의 노인">바다의 노인 · 히든</option></optgroup>
+    </select>
   );
 }

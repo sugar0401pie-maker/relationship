@@ -8,6 +8,7 @@ import { meetImages, reportImages, seededIndex, typeImage, type Manifest, type P
 import type { RelResult } from "./result.ts";
 import type { Relationship } from "./steps.ts";
 import type { TypeRow } from "./flow.ts";
+import type { CompareData } from "./compare.ts";
 
 type Dict = Record<string, unknown>;
 type Card = { slot: string; practice_id: string; title: string; how: string; cue: string; minutes: number; format: string; why: string; role?: string };
@@ -19,7 +20,7 @@ export type TypeCard = {
 export type Block = { t: "p"; parts: { b: boolean; t: string }[] } | { t: "item"; text: string } | { t: "step"; n: number; text: string };
 export type AiSection = { no: number; title: string; blocks: Block[] };
 export type PracticeCardView = { slot: string; minutes: number; format: string; title: string; how: string; cue: string; why: string; id: string; role?: string; together: boolean };
-export type PlanStep = { day: string; both: boolean; title: string; how?: string; tired?: string };
+export type PlanStep = { day: string; both: boolean; title: string; how?: string; ex?: string[]; role?: string; tired?: string };
 
 export type ResultView = {
   id: string;
@@ -37,8 +38,14 @@ export type ResultView = {
     ai: Record<4 | 5 | 6 | 7 | 8, { title: string; teaser: string }>;
     leadLines: string;
     images: Pic[];
-    p9: { cards: PracticeCardView[]; planTitle: string; plan: PlanStep[]; solo?: string };
-    p10: { title: string; bubble: string; starters: string[]; disclaimer: string };
+    p9: { note: string; cards: PracticeCardView[] };
+    p10: { title: string; intro: string; sub: string; selSelf: string; selView: string; placeholder: string; button: string; invite: string; inviteNote: string };
+    p11: { title: string; locked: string; lockButton: string; notJudge: string };
+    p12: {
+      title: string; talkTitle: string; planTitle: string; planNote: string; plan: PlanStep[]; planWhy?: string; planSrc: string; solo?: string;
+      extraTitle: string; sowellaTitle: string; bubble: string; starters: string[]; disclaimer: string;
+    };
+    compare: CompareData;
   };
 };
 
@@ -113,13 +120,16 @@ export function buildResultView(D: Dict, M: Manifest, inp: BuildInput): ResultVi
   const share = rf.share as Dict;
 
   // ---------- 5~10쪽 그림 ----------
-  const images = reportImages(M, r.myType, r.pType, inp.id, 6, meet.pair ? [meet.pair.src] : []);
+  const images = reportImages(M, r.myType, r.pType, inp.id, 8, meet.pair ? [meet.pair.src] : []);
 
   // ---------- 9쪽: 실천 카드 + 작심삼일 ----------
   const cv: Vars = { ...vars, A: r.meIsA ? "나" : nickname, B: r.meIsA ? nickname : "나" };
   const mine = ((D.practice_cards as Record<string, Card[]>)[r.myType] ?? []).map((c) => card(c, cv, false));
-  const together = ((D.loop_practices as Record<string, Card[]>)[r.loopKey] ?? []).map((c) => card(c, cv, true));
-  const { plan, solo } = couplePlan(D, r, cv, mine);
+  const loopCards = (D.loop_practices as Record<string, Card[]>)[r.loopKey] ?? [];
+  const merged = couplePlan(D, r, cv, mine, loopCards);
+  const { plan, solo } = merged;
+  const pc = rf.partner_compare as Dict;
+  const box = pc.box as Record<string, string>;
 
   // ---------- 10쪽 ----------
   const reflect = ((D.reflect_questions as Record<string, { question: string }[]>)[r.myType] ?? []).map((q) => R(q.question, vars));
@@ -174,13 +184,32 @@ export function buildResultView(D: Dict, M: Manifest, inp: BuildInput): ResultVi
       },
       leadLines,
       images,
-      p9: { cards: [...mine, ...together], planTitle: R("{애칭|과} 함께하는 작심삼일", vars), plan, solo },
+      // 9쪽: 혼자 카드 3장만(v2.6.1 — '{애칭|과} 함께'는 12쪽 작심삼일에 합침)
+      p9: { note: R("혼자 해 볼 카드 세 장입니다. {애칭|과} 함께 해 볼 것은 마지막 12쪽에 모았습니다.", vars), cards: mine },
+      // 10쪽: 상대 결과 고르기(partner_compare.box). 안내 문단은 시안 문장을 일반화한 것
       p10: {
         title: pageTitle(10),
-        bubble: cpl?.sowella?.day2 ? R(cpl.sowella.day2, { ...vars, day2_title: plan[1]?.title ?? "", day2_tired_title: plan[1]?.tired ?? "" }) : "",
+        intro: R("{애칭}도 테스트를 했다면, 두 사람이 서로를 어떻게 보고 있는지 맞춰 볼 수 있습니다. {애칭|이} 아직 안 했다면 링크를 보내 보세요. 비교하지 않아도 12쪽 '{애칭|과} 함께 해 볼 일'은 그대로 볼 수 있습니다.", vars),
+        sub: R(box.sub, vars), selSelf: R(box.select_partner_self, vars), selView: R(box.select_partner_view_me, vars), placeholder: box.placeholder,
+        button: box.button, invite: R(box.invite, vars), inviteNote: R(box.invite_note, vars),
+      },
+      p11: {
+        title: pageTitle(11), locked: R(str(pc.locked), vars), lockButton: R("{애칭} 결과 넣으러 가기", vars),
+        notJudge: "누가 맞고 틀린 것이 아닙니다. 서로의 행동은 보였고, 그 이유를 각자 다르게 짐작했을 수 있습니다.",
+      },
+      p12: {
+        title: pageTitle(12),
+        talkTitle: "생각의 차이를 좁히는 서로 해볼 말",
+        planTitle: "둘이 함께하는 작심삼일",
+        planNote: "하루에 하나씩, 둘이 함께 해 보는 계획입니다. 쏘웰라가 2일차와 3일차에 먼저 말을 걸어 드립니다.",
+        plan, planWhy: merged.why, planSrc: merged.src, solo,
+        extraTitle: "생각의 차이를 좁히는 데 더해 볼 것",
+        sowellaTitle: "쏘웰라와 이어서 이야기하기",
+        bubble: cpl?.sowella?.day2 ? R(cpl.sowella.day2, { ...vars, day2_title: plan[1]?.title ?? "", day2_tired_title: merged.tiredTitle ?? "" }) : "",
         starters: [...reflect.slice(0, 2), "오늘 해 본 실천 이야기하기"],
         disclaimer: cleanContacts(disclaimer),
       },
+      compare: compareData(D, M, r, name, nickname, merged.family),
     },
   };
 }
@@ -192,24 +221,84 @@ function card(c: Card, v: Vars, together: boolean): PracticeCardView {
   };
 }
 
-// 9쪽 아래 「{애칭|과} 함께하는 작심삼일」(결제후_리포트화면_v1.md 6장): 1일차 = 내 '오늘' 카드, 2일차 = 둘이(지친 날 대체),
-// 3일차 = 돌아보기, 1주일, 1달. 문구는 couple_plans·couple_activities 그대로(서버 조립, AI 아님).
-function couplePlan(D: Dict, r: RelResult, v: Vars, mine: PracticeCardView[]): { plan: PlanStep[]; solo?: string } {
+// 12쪽 「둘이 함께하는 작심삼일」(v2.6.1 합친 판, couple_plans.merge_rule): 1일차 = 내 '오늘' 카드, 2일차 = 둘이 + 함께 실천 2개를 녹임,
+// 3일차 = 돌아보기, 1주일, 1달. 문구는 couple_plans·couple_activities·loop_practices 그대로(서버 조립, AI 아님).
+// 합치는 방법: 가족 2일차 how에 ①·③ 칸이 있으면 ①에 loop_practices[0]의 예시 문장, ③에 loop_practices[1] 제목을 '— 예:'로 끼우고,
+// 칸이 없으면 같은 두 줄을 2일차 아래 예시로 붙인다. loop_practices[0].role = 역할 줄, [0].why = 계획 아래 한 줄.
+function couplePlan(D: Dict, r: RelResult, v: Vars, mine: PracticeCardView[], lp: Card[]) {
   const cp = ((D.couple_plans as Dict).loops as Record<string, Dict>)[r.loopKey];
   const fams = (D.couple_activities as Dict).families as Record<string, { solo_version: string; steps: { code: string; title: string; how: string }[] }>;
-  if (!cp) return { plan: [] };
-  const fam = fams[str(cp.family)];
+  const empty = { plan: [] as PlanStep[], src: "", family: "" } as { plan: PlanStep[]; src: string; family: string; why?: string; solo?: string; tiredTitle?: string };
+  if (!cp) return empty;
+  const famCode = str(cp.family);
+  const fam = fams[famCode];
   const step = (code: unknown) => fam?.steps.find((s) => s.code === code);
   const d2 = step((cp.day2 as Dict)?.code), d2t = step((cp.day2_tired as Dict)?.code), wk = step((cp.week as Dict)?.code), mo = step((cp.month as Dict)?.code);
   const today = mine.find((c) => c.slot === "오늘");
   const reflect = (D.reflect_questions as Record<string, { question: string }[]>)[r.myType]?.[0];
+  const quote = lp[0] ? (R(lp[0].how, v).match(/"[^"]+"|“[^”]+”/)?.[0] ?? null) : null;
+  const second = lp[1] ? R(lp[1].title, v) : null;
   const plan: PlanStep[] = [];
-  if (today) plan.push({ day: "1일차", both: false, title: today.title, how: today.how });
-  if (d2) plan.push({ day: "2일차", both: true, title: R(d2.title, v), how: R(d2.how, v), tired: d2t ? R(d2t.title, v) : undefined });
-  if (d2) plan.push({ day: "3일차", both: false, title: R(str((cp.day3 as Dict)?.title), { ...v, day2_title: R(d2.title, v) }), how: reflect ? R(reflect.question, v) : undefined });
+  if (today) plan.push({ day: "1일차", both: false, title: today.title, how: "9쪽 '오늘' 카드를 혼자 해 봅니다." });
+  if (d2) {
+    let how = R(d2.how, v);
+    const ex: string[] = [];
+    if (/①/.test(how) && /③/.test(how)) {
+      if (quote) how = how.replace(/(①[^②③④]*?)(\s*②)/, `$1 — 예: ${quote}$2`);
+      if (second) how = how.replace(/(③[^④]*?)(\s*④)/, `$1 — 예: ${second}$2`);
+    } else {
+      if (quote) ex.push(`예: ${quote}`);
+      if (second) ex.push(`함께 더해 보기: ${second}`);
+    }
+    plan.push({
+      day: "2일차", both: true, title: R(d2.title, v), how, ex,
+      role: lp[0]?.role ? R(lp[0].role, v) : undefined,
+      tired: d2t ? `${R(d2t.title, v)} — ${R(d2t.how, v)}` : undefined,
+    });
+    plan.push({ day: "3일차", both: false, title: R(str((cp.day3 as Dict)?.title), { ...v, day2_title: R(d2.title, v) }), how: reflect ? R(reflect.question, v) : undefined });
+  }
   if (wk) plan.push({ day: "1주일", both: true, title: R(wk.title, v), how: R(wk.how, v) });
   if (mo) plan.push({ day: "1달", both: true, title: R(mo.title, v), how: R(mo.how, v) });
-  return { plan, solo: fam ? R(fam.solo_version, v) : undefined };
+  const ids = lp.map((c) => c.practice_id).join(" · ");
+  return {
+    plan, family: famCode,
+    why: lp[0] ? R(lp[0].why, v) : undefined,
+    src: `연인과 함께 하는 작심삼일 ${famCode}${ids ? ` + 쏘웰라 실천 DB ${ids}를 합침` : ""}`,
+    solo: fam ? R(fam.solo_version, v) : undefined,
+    tiredTitle: d2t ? R(d2t.title, v) : undefined,
+  };
+}
+
+// 10~12쪽 비교에 쓰는 재료(무료 문구만 — 상대 결과는 브라우저에서 유형 두 개로만 비교). lib/rel/compare.ts가 쓴다.
+function compareData(D: Dict, M: Manifest, r: RelResult, name: string, nickname: string, loopFamily: string): CompareData {
+  const pc = (D.result_flow as Dict).partner_compare as Dict;
+  const types = D.types as TypeRow[];
+  const roots = ((D.type_roots as Dict).types ?? {}) as Record<string, { main?: { id: string }; cause_line?: string }>;
+  const fams = (D.couple_activities as Dict).families as Record<string, { category: string; types: string[]; roots: { id: string }[]; steps: { slot: string; title: string; how: string }[] }>;
+  // 가족 찾기: families[].types에 그 유형이 있으면 그것, 없으면 그 유형 main 뿌리가 들어간 가족, 그래도 없으면 CPL-GOOD('모든 유형')
+  const famOf = (n: string) => {
+    for (const [k, f] of Object.entries(fams)) if (f.types.includes(n)) return k;
+    const root = roots[n]?.main?.id;
+    for (const [k, f] of Object.entries(fams)) if (root && f.roots.some((x) => x.id === root)) return k;
+    return fams["CPL-GOOD"] ? "CPL-GOOD" : "";
+  };
+  const loops = Object.fromEntries((D.loops as { 조합: string; 고리: string }[]).map((l) => [l.조합.replace(/\s/g, ""), cleanLoopName(l.고리)]));
+  return {
+    types: types.map((t) => ({ name: t.name, comp: t.competency, mode: t.mode, img: typeImage(M, t.name), cause: roots[t.name]?.cause_line ?? "", family: famOf(t.name) })),
+    comps: [...S.COMPS],
+    modes: [...S.MODES],
+    loops,
+    families: Object.fromEntries(Object.entries(fams).map(([k, f]) => {
+      const d2 = f.steps.find((x) => x.slot === "2일차");
+      return [k, { code: k, cat: f.category, title: d2?.title ?? "", how: d2?.how ?? "" }];
+    })),
+    loopFamily,
+    modeActions: pc.mode_actions as Record<string, string>,
+    kinds: pc.gap_kinds as CompareData["kinds"],
+    lines: pc.lines as Record<string, string>,
+    me: { name, self: r.myType, view: r.pType },
+    nickname,
+  };
 }
 
 // ---------- AI 리포트 본문(### 4. ~ ### 8.) → 화면 조각 ----------

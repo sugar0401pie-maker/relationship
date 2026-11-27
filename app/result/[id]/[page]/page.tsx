@@ -7,7 +7,7 @@ export const metadata = { title: "결과 · 강에 사는 나, 바다에 사는 
 export default async function ResultPage({ params }: PageProps<"/result/[id]/[page]">) {
   const { id, page } = await params;
   const n = Number(page);
-  if (!Number.isInteger(n) || n < 1 || n > 10) redirect(`/result/${id}/1`);
+  if (!Number.isInteger(n) || n < 1 || n > 12) redirect(`/result/${id}/1`);
   return (
     <AuthGate>
       <ResultPages id={id} page={n} />
