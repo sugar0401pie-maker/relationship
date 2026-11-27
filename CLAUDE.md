@@ -29,7 +29,7 @@ owner는 개발자가 아니다. 큰 변경마다 (1) 무엇을·왜 바꾸는�
 - 순수 로직(서버·테스트 공용): `lib/rel/flow.ts`(장면 순서·확인 화면), `steps.ts`(장면 문구 렌더 — 점수는 브라우저로 보내지 않고 보기 위치로만), `result.ts`(채점 = 패키지 `scoring.js` 호출만), `pages.ts`(결과 10쪽 조립), `images.ts`(그림 규칙), `reportInput.js`(AI 입력 = 패키지 `report_pretest/build_input.mjs`와 같은 규칙), `reportValidate.js`(자동 검증 = 패키지 `validate.mjs`, 유형 이름만 ctx로).
 - `lib/rel/scoring.js`·`josa.js`·`test_scoring.mjs`·`report_pretest/`는 owner 패키지 원본 — **로직을 고치지 않는다**(경로만 이 저장소에 맞춤). 패키지 새 버전이 오면 `data/`·`docs/`·`db/`·이 파일들을 통째로 바꾸고 `npm test`.
 - 서버는 `lib/server/*`(`server-only`). 데이터·문서는 실행 중에 파일로 읽는다(`lib/server/data.ts`, 배포본 포함은 `next.config.ts` outputFileTracingIncludes).
-- AI는 `lib/server/ai.ts` 한 곳(Responses API, 모델 env `REL_AI_MODEL`, 기본 `gpt-5.6-luna`(owner 2026-11-25, 패키지 스펙 기본은 gpt-6-sol), 25,000 토큰, `store:false`). 한 번 호출 = 한 번 시도, 검증 실패 시 'none'으로 돌려 결과 화면이 다시 요청 → 2회차도 실패면 'failed'(글은 저장 안 함). 사용자가 [다시 만들기]로 한 회차 더(최대 4회 시도).
+- AI는 `lib/server/ai.ts` 한 곳(Responses API, 모델 env `REL_AI_MODEL`, 기본 `gpt-6-luna`(owner 2026-11-27, 그 전 gpt-5.6-luna. 패키지 스펙 기본은 gpt-6-sol), 25,000 토큰, `store:false`). 한 번 호출 = 한 번 시도, 검증 실패 시 'none'으로 돌려 결과 화면이 다시 요청 → 2회차도 실패면 'failed'(글은 저장 안 함). 사용자가 [다시 만들기]로 한 회차 더(최대 4회 시도).
 - AI 리포트의 '강하게 답한 장면'(notable_answers)은 패키지에 규칙이 없어 고정 규칙으로 고른다(`reportInput.js` pickNotable 주석).
 
 ## 4. Supabase 공유 규칙
@@ -62,3 +62,4 @@ owner는 개발자가 아니다. 큰 변경마다 (1) 무엇을·왜 바꾸는�
 - **2026-11-27 — 10쪽에서 고른 상대 두 유형도 저장(owner — 패키지 v2.6의 "저장하지 않음"을 바꿈).** 유형 이름 두 개만 `rel_sessions.partner_pick_self/view/at`(마이그레이션 `20261127000000_rel_partner_pick.sql`)에, `POST /api/rel/result/{id}/partner`. 결과를 열면 저장된 값이 먼저, 없으면 그 기기에 남긴 값. 칸이 없으면(마이그레이션 전) 저장만 건너뛰고 비교는 그대로. 10쪽 상자 아래 안내(데이터 box.invite_note "저장되지 않고…")는 사실과 달라져 "고른 두 유형만 내 결과에 함께 저장되고, {애칭}의 점수나 답은 저장되지 않습니다."로 바꿔 보인다(`lib/rel/pages.ts`). 패키지 다음 판에서 데이터 문구를 맞추면 되돌린다.
 - **2026-11-27 — R2(분량) 실패 줄이기(owner).** 고쳐 쓰기를 시간이 남는 한 최대 2번(`lib/server/report.ts` MAX_REVISIONS). R2에 걸리면 넘친/모자란 글자 수와 겨냥할 범위(3,500~4,000자)를 숫자로 알려 주고, 다른 규칙을 고칠 때도 분량 범위를 함께 적는다. 화면의 실패 이유에 R2 글자 수를 같이 보인다. 검증 규칙(3,000~4,500자)은 그대로.
   - 같은 날 이어서: **분량(R2)은 더 이상 걸러 내지 않는다(owner).** 운영 검증본 `lib/rel/reportValidate.js`에서 R2는 글자 수만 남기고 항상 통과. 패키지 원본 `report_pretest/validate.mjs`·프롬프트의 분량 안내는 그대로. 고쳐 쓰기 최대 2번은 다른 규칙용으로 유지.
+  - 같은 날: **리포트 기본 모델 gpt-5.6-luna → gpt-6-luna(owner).** Vercel에 `REL_AI_MODEL`이 있으면 그 값이 우선이니 함께 바꾸거나 지운다.
